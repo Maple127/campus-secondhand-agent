@@ -1,5 +1,6 @@
 # 校园二手交易平台 · AI Agent 化
 
+[![CI](https://github.com/Maple127/campus-secondhand-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Maple127/campus-secondhand-agent/actions/workflows/ci.yml)
 一个能跑的校园二手交易平台（Java），加一层受约束的 AI Agent（Python）。
 
 **这个项目真正想回答的问题是：哪些事值得交给 Agent，哪些不值得——以及怎么证明。**
