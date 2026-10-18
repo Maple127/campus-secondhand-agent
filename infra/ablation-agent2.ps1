@@ -22,7 +22,7 @@ $ErrorActionPreference = 'Stop'
 $BaseEnv = @{}
 
 function Get-ApiKey {
-        # 凭据路径不写死：优先环境变量，其次用户目录（不泄露本机用户名）
+    # 凭据路径不写死：优先环境变量，其次用户目录（不泄露本机用户名）
     $credPath = if ($env:DSH_CREDENTIALS) {
         $env:DSH_CREDENTIALS
     } else {

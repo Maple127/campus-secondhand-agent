@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+from pathlib import Path
 import re
 import sys
 
@@ -27,7 +29,10 @@ BASE = "http://localhost:8081"
 AGENT = "http://127.0.0.1:8090"
 SERVICE = "demo-agent-token-local"
 # 凭据路径不写死：优先环境变量，其次用户目录
-CRED = Path(os.environ.get("DSH_CREDENTIALS") or (Path.home() / ".dsh" / "credentials.yaml"))
+CRED = Path(
+    os.environ.get("DSH_CREDENTIALS")
+    or (Path.home() / ".dsh" / "credentials.yaml")
+)
 
 
 def read_key() -> str:
