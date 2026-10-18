@@ -1,0 +1,9 @@
+{
+  "scenario": "fault",
+  "http_status": 200,
+  "latency_ms": 8670,
+  "retries": 2,
+  "retry_exhausted": 1,
+  "graceful": true,
+  "reply": "后端服务暂时不可用（504），这次没查到结果。稍等一会儿再试一次吧，或者刷新页面重新问我。"
+}

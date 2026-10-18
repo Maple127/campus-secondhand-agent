@@ -26,6 +26,7 @@ from langgraph.errors import GraphBubbleUp
 
 from app.backend import BackendClient, BackendError
 from app.config import get_settings
+from app.guardrails import fence_untrusted
 from app.metrics import METRICS
 
 logger = logging.getLogger(__name__)
@@ -208,8 +209,10 @@ async def search_products(
     # 实测搜「吉他」时模型会连试 4 个同义词，每次一个后端请求 + 一轮模型往返。
     # 开关 ENABLE_EMPTY_SEARCH_GATE 供消融评测关闭它，测这个闸门到底值多少。
     state = _turn_state.get()
-    gate_on = get_settings().enable_empty_search_gate
-    if gate_on and state is not None and state.empty_streak >= MAX_EMPTY_SEARCHES:
+    _settings = get_settings()
+    gate_on = _settings.enable_empty_search_gate
+    threshold = max(1, _settings.max_empty_searches)
+    if gate_on and state is not None and state.empty_streak >= threshold:
         METRICS.empty_search_blocks += 1
         logger.info(
             "search_products: 本轮已有 %d 次空结果，拒绝继续搜索 query=%r",
@@ -387,7 +390,9 @@ async def get_product(product_id: int) -> str:
         return _handle_error(exc)
 
     detail = _product_brief(p)
-    detail["description"] = p.get("description")
+    # 描述是卖家可控的：围栏 + 标记，模型看到边界就不会把它当指令
+    detail["description"] = fence_untrusted(p.get("description"))
+    detail["_untrusted_fields"] = ["name", "description"]
     detail["originalPrice"] = p.get("originalPrice")
     detail["createdAt"] = p.get("createTime")
     return _dumps(detail)

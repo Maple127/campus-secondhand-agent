@@ -25,13 +25,14 @@ from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from app.backend import BackendClient, BackendError
 from app.config import get_settings
 from app.graph import AgentRunner
+from app.guardrails import GuardrailError, detect_prompt_injection
 from app.metrics import METRICS
 
 logging.basicConfig(
@@ -58,6 +59,7 @@ async def lifespan(app: FastAPI):
         service_token=_settings.require_service_token(),
         timeout=_settings.backend_timeout,
         trust_env=_settings.backend_trust_env,
+        max_retries=_settings.backend_max_retries,
     )
     app.state.backend = backend
 
@@ -138,7 +140,24 @@ def _require_actor_token(actor_token: str | None) -> str:
 
 @app.get("/health")
 async def health() -> dict:
-    """健康检查：同时探测 Java 后端是否可达。"""
+    """存活检查（liveness）：**永远返回 200**，只要进程还能响应。
+
+    这里刻意不因为"后端不可达"而返回 5xx。
+    之前把两件事混在一起，导致后端一挂，编排系统会以为 **agent 进程死了**，
+    于是重启一个根本没问题的服务 —— 重启并不能让 Java 后端活过来。
+
+    后端是否可用放在 body 的 `backend.ok` 里，以及 `/health/ready` 的语义里。
+    """
+    return {"status": "ok", "model": _settings.deepseek_model}
+
+
+@app.get("/health/ready")
+async def health_ready() -> Any:
+    """就绪检查（readiness）：依赖不可用时返回 503。
+
+    编排系统应该把它用于"要不要给这个实例送流量"，
+    而不是用于"要不要重启它"。
+    """
     backend: BackendClient = app.state.backend
     backend_ok = False
     detail = ""
@@ -157,11 +176,12 @@ async def health() -> dict:
     except Exception as exc:  # noqa: BLE001
         detail = f"unreachable: {exc}"
 
-    return {
-        "status": "ok",
+    body = {
+        "status": "ready" if backend_ok else "degraded",
         "backend": {"url": _settings.backend_base_url, "ok": backend_ok, "detail": detail},
         "model": _settings.deepseek_model,
     }
+    return JSONResponse(status_code=200 if backend_ok else 503, content=body)
 
 
 @app.post("/api/chat/stream")
@@ -174,6 +194,7 @@ async def chat_stream(
     事件类型见 app/graph.py 顶部说明。
     """
     actor_token = _require_actor_token(x_actor_token)
+    _guard_input(req.message)
     backend: BackendClient = app.state.backend
     runner: AgentRunner = app.state.runner
 
@@ -205,6 +226,7 @@ async def chat(
 ) -> dict:
     """非流式对话，便于脚本与自动化测试调用。"""
     actor_token = _require_actor_token(x_actor_token)
+    _guard_input(req.message)
     backend: BackendClient = app.state.backend
     runner: AgentRunner = app.state.runner
 
@@ -229,6 +251,23 @@ async def chat(
         # token 用量：评测据此计算单次成本
         "usage": runner.last_usage,
     }
+
+
+def _guard_input(message: str) -> None:
+    """入口护栏：命中注入模式就直接拒绝，不进入模型。
+
+    拒绝话术刻意**不解释**具体命中了哪条规则 ——
+    说明规则等于给攻击者一份"怎么绕过"的说明书。
+    """
+    try:
+        detect_prompt_injection(message)
+    except GuardrailError as exc:
+        METRICS.guardrail_blocks += 1
+        logger.warning("护栏拦截：%s", exc.code)
+        raise HTTPException(
+            status_code=400,
+            detail="这个请求包含我无法处理的内容，换个方式问问看？",
+        ) from exc
 
 
 def _record_turn(runner: Any) -> None:

@@ -1,0 +1,13 @@
+{
+  "scenario": "gate",
+  "tool_calls": [
+    "search_products",
+    "search_products"
+  ],
+  "tool_call_count": 2,
+  "tokens_in": 12302,
+  "tokens_out": 172,
+  "latency_ms": 2777,
+  "empty_search_blocks": 0,
+  "reply": "平台上暂时没有在售的二手投影仪，我搜了「投影仪」和「投影」两个词，结果都是 0 条。\n\n几个建议：\n- 换个类目逛逛，比如「数码电子」里可能有电视盒子、显示器之类的替代品\n- 如果你自己手上有闲置投影仪想出手，我可以帮你发布\n- 也可以过几天再来看看，二手商品更新挺快的\n\n需要我帮你看看别的类目吗？"
+}

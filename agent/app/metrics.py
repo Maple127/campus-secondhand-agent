@@ -51,6 +51,10 @@ class Metrics:
     empty_search_blocks: int = 0
     """被空结果闸门拦下的第 3 次搜索"""
 
+    # ---- 护栏 ----
+    guardrail_blocks: int = 0
+    """入口检测拦下的注入/越权输入"""
+
     def record_turn(self, tokens_in: int, tokens_out: int) -> None:
         self.turns += 1
         self.tokens_in += tokens_in

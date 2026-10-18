@@ -112,6 +112,25 @@ CONSTRAINT_TURNS = [
     "如果我今天下午去买，大概几点方便？",
     "再确认一下我的需求吧。",
     "好，那就这样。",
+    # ---- 后 18 轮：拉长上下文，逼压缩触发 ----
+    "对了，学校附近有没有卖台灯的店？",
+    "网购的二手台灯一般能用多久？",
+    "如果灯坏了能修吗？",
+    "你之前说有几件台灯来着？",
+    "最便宜的那件成色怎么样？",
+    "宿舍能用大功率的台灯吗？",
+    "我室友也想买一个，有推荐吗？",
+    "他预算大概 80，有合适的吗？",
+    "台灯一般多重？好搬吗？",
+    "南门那边能自提吗？",
+    "如果我不买了，会有什么影响吗？",
+    "算了，还是先看看。",
+    "那台 ¥45 的护眼台灯具体什么参数？",
+    "它和 ¥38 那件差在哪？",
+    "¥38 那件灯罩发黄是不是影响使用？",
+    "你觉得我该买哪件？",
+    "如果两件我都想要呢？",
+    "最后再帮我确认一遍：我到底要买什么、预算多少、什么东西我说过不要。",
 ]
 
 PROBE = "从头到尾回顾一下：我要买什么、预算是多少、我说过哪些东西不要？"
@@ -155,15 +174,52 @@ async def scenario_compress(turns: int) -> dict:
     }
 
 
+async def scenario_fault() -> dict:
+    """故障注入：后端不可达时，agent 会怎么表现。
+
+    跑之前要把 agent 的 BACKEND_BASE_URL 指向一个没人监听的端口，
+    这样"请求必然失败"，可以观察重试与降级。
+    """
+    conv = f"abl-fault-{uuid.uuid4().hex[:6]}"
+    async with httpx.AsyncClient(trust_env=False) as c:
+        # ---------- 场景 A：只读工具失败 ----------
+        # 注意：此时后端真的不可达，拿不到 actor token，
+        # 所以直接构造一个假 token —— 反正请求会在传输层就失败。
+        t0 = time.perf_counter()
+        r = await c.post(
+            f"{AGENT}/api/chat",
+            headers={"X-Actor-Token": "fault-injection-token"},
+            json={"message": "有什么 200 以内的耳机？", "conversationId": conv},
+            timeout=180.0,
+        )
+        elapsed = int((time.perf_counter() - t0) * 1000)
+        d = r.json() if r.status_code < 500 else {"reply": "", "error": str(r.status_code)}
+        m = (await c.get(f"{AGENT}/api/metrics")).json()["counters"]
+
+    reply = (d.get("reply") or "") if isinstance(d, dict) else ""
+    return {
+        "scenario": "fault",
+        "http_status": r.status_code,
+        "latency_ms": elapsed,
+        "retries": m.get("retries", 0),
+        "retry_exhausted": m.get("retry_exhausted", 0),
+        # 关键判据：有没有给用户一句人话，而不是把异常抛出去
+        "graceful": any(k in reply for k in ("暂时不可用", "稍后", "连接", "无法")),
+        "reply": reply[:400],
+    }
+
+
 async def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scenario", choices=["gate", "compress"], required=True)
+    ap.add_argument("--scenario", choices=["gate", "compress", "fault"], required=True)
     ap.add_argument("--turns", type=int, default=12)
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
     if args.scenario == "gate":
         result = await scenario_gate()
+    elif args.scenario == "fault":
+        result = await scenario_fault()
     else:
         result = await scenario_compress(args.turns)
 

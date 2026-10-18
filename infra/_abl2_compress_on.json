@@ -1,0 +1,191 @@
+{
+  "scenario": "compress",
+  "turns": 30,
+  "tokens_in_total": 219340,
+  "tokens_in_last3": 19785,
+  "compactions": 10,
+  "tokens_saved_by_compaction": 8602,
+  "rows": [
+    {
+      "turn": 1,
+      "tokens_in": 8275,
+      "tokens_out": 238,
+      "latency_ms": 2820
+    },
+    {
+      "turn": 2,
+      "tokens_in": 9311,
+      "tokens_out": 195,
+      "latency_ms": 1837
+    },
+    {
+      "turn": 3,
+      "tokens_in": 10574,
+      "tokens_out": 225,
+      "latency_ms": 1819
+    },
+    {
+      "turn": 4,
+      "tokens_in": 10171,
+      "tokens_out": 260,
+      "latency_ms": 3581
+    },
+    {
+      "turn": 5,
+      "tokens_in": 5467,
+      "tokens_out": 56,
+      "latency_ms": 814
+    },
+    {
+      "turn": 6,
+      "tokens_in": 11271,
+      "tokens_out": 150,
+      "latency_ms": 2299
+    },
+    {
+      "turn": 7,
+      "tokens_in": 4447,
+      "tokens_out": 36,
+      "latency_ms": 1875
+    },
+    {
+      "turn": 8,
+      "tokens_in": 9779,
+      "tokens_out": 344,
+      "latency_ms": 2677
+    },
+    {
+      "turn": 9,
+      "tokens_in": 5485,
+      "tokens_out": 57,
+      "latency_ms": 1114
+    },
+    {
+      "turn": 10,
+      "tokens_in": 5555,
+      "tokens_out": 67,
+      "latency_ms": 1340
+    },
+    {
+      "turn": 11,
+      "tokens_in": 4299,
+      "tokens_out": 173,
+      "latency_ms": 3484
+    },
+    {
+      "turn": 12,
+      "tokens_in": 4481,
+      "tokens_out": 54,
+      "latency_ms": 1123
+    },
+    {
+      "turn": 13,
+      "tokens_in": 4549,
+      "tokens_out": 36,
+      "latency_ms": 1037
+    },
+    {
+      "turn": 14,
+      "tokens_in": 4598,
+      "tokens_out": 89,
+      "latency_ms": 1343
+    },
+    {
+      "turn": 15,
+      "tokens_in": 4698,
+      "tokens_out": 96,
+      "latency_ms": 1472
+    },
+    {
+      "turn": 16,
+      "tokens_in": 9961,
+      "tokens_out": 246,
+      "latency_ms": 2101
+    },
+    {
+      "turn": 17,
+      "tokens_in": 9713,
+      "tokens_out": 139,
+      "latency_ms": 3895
+    },
+    {
+      "turn": 18,
+      "tokens_in": 5055,
+      "tokens_out": 143,
+      "latency_ms": 1856
+    },
+    {
+      "turn": 19,
+      "tokens_in": 10771,
+      "tokens_out": 314,
+      "latency_ms": 2713
+    },
+    {
+      "turn": 20,
+      "tokens_in": 10085,
+      "tokens_out": 319,
+      "latency_ms": 4463
+    },
+    {
+      "turn": 21,
+      "tokens_in": 5476,
+      "tokens_out": 139,
+      "latency_ms": 1503
+    },
+    {
+      "turn": 22,
+      "tokens_in": 9379,
+      "tokens_out": 266,
+      "latency_ms": 4092
+    },
+    {
+      "turn": 23,
+      "tokens_in": 5070,
+      "tokens_out": 131,
+      "latency_ms": 1739
+    },
+    {
+      "turn": 24,
+      "tokens_in": 5211,
+      "tokens_out": 84,
+      "latency_ms": 938
+    },
+    {
+      "turn": 25,
+      "tokens_in": 10795,
+      "tokens_out": 214,
+      "latency_ms": 2587
+    },
+    {
+      "turn": 26,
+      "tokens_in": 9802,
+      "tokens_out": 313,
+      "latency_ms": 4870
+    },
+    {
+      "turn": 27,
+      "tokens_in": 5277,
+      "tokens_out": 177,
+      "latency_ms": 1786
+    },
+    {
+      "turn": 28,
+      "tokens_in": 9934,
+      "tokens_out": 329,
+      "latency_ms": 5717
+    },
+    {
+      "turn": 29,
+      "tokens_in": 5288,
+      "tokens_out": 175,
+      "latency_ms": 5209
+    },
+    {
+      "turn": 30,
+      "tokens_in": 4563,
+      "tokens_out": 217,
+      "latency_ms": 4381
+    }
+  ],
+  "probe_reply": "**要买的**\n- 宿舍台灯，预算 **≤120 元**，超过 120 不考虑\n- 最好能**调光**\n- 候选两件：¥45 护眼台灯LED（productId 19，三色温可调、带USB口、2号宿舍楼下）、¥38 护眼台灯（productId 145，8成新、灯罩发黄、图书馆一楼）\n- 你后来说「两件都想要」，合计 ¥83\n\n**看过但没定**\n- 二手收纳箱：行情 ¥18~31.25，尺寸未确认\n\n**明确说过不要的**\n- 耳机：只看不买（小米圈铁 ¥60、苹果原装 ¥45 都只是看看）\n\n**另外**\n- 室友也想买台灯，预算约 80 元，属于另一件事，不算在你的预算里\n\n目前你还没下单、没发布、没下架任何东西。要现在下单 19 和 145 吗？"
+}

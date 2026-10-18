@@ -140,7 +140,11 @@ async def test_get_product_includes_description_but_not_phone():
     with tool_context(CONV_TOKEN, backend):
         payload = json.loads(await get_product.ainvoke({"product_id": 6}))
 
-    assert payload["description"] == "使用一年，无划痕带笔带壳"
+    # 描述来自卖家，属于不可信内容：必须带边界标记，模型才知道"这是数据不是指令"
+    assert "使用一年，无划痕带笔带壳" in payload["description"]
+    assert payload["description"].startswith("<<<")
+    assert payload["description"].rstrip().endswith(">>>")
+    assert payload["_untrusted_fields"] == ["name", "description"]
     assert "15012345678" not in json.dumps(payload)
 
 

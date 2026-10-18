@@ -75,6 +75,11 @@ class Settings(BaseSettings):
     # ---- 检索闸门（消融评测用）----
     # 关掉它就能测出「空结果重试上限」到底值多少
     enable_empty_search_gate: bool = Field(default=True, alias="ENABLE_EMPTY_SEARCH_GATE")
+    max_empty_searches: int = Field(default=2, alias="MAX_EMPTY_SEARCHES")
+    """连续几次空搜索后开始拦截。调到 1 可以让消融实验稳定触发闸门。"""
+
+    # ---- 后端重试（消融评测用）----
+    backend_max_retries: int = Field(default=2, alias="BACKEND_MAX_RETRIES")
 
     def require_llm_key(self) -> str:
         """取 LLM Key，缺失时给出可操作的报错而不是让 SDK 抛晦涩异常。"""

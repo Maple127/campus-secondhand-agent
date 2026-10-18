@@ -70,8 +70,9 @@ Agent 侧限制了重试次数（最多换 1 次说法），实测搜索次数 4
 
 ## 🧪 消融评测与面试自检
 
-- [消融评测](docs/ablation.md)：品类词 +33.3pt 召回、上下文压缩 −31.6% token、闸门实验失败（如实记录）
-- [Agent 面试自检表](docs/agent-interview-map.md)：被追问的问题 → 我们的答案 → 证据 → 空白
+- [消融评测](docs/ablation.md)：四个单变量实验——品类词 +33.3pt、压缩 −35.2%、闸门 +25 token、重试 −5.0s
+- [Agent 面试自检表](docs/agent-interview-map.md)：39 个会被追问的问题 → 答案 → 证据 → 空白（27/6/6）
+- [注入防护](docs/injection-defense.md)：入口检测 + 内容围栏，22 条测试
 
 ## 💰 议价 Copilot（第一阶段）
 
