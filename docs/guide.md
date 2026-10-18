@@ -1,4 +1,4 @@
-# 使用指南（零基础版）
+# 使用指南（零基础）
 
 > 目标：让你从"什么都不懂"到能自己启动、浏览、操作，并分别看到
 > **前端、后端、AI 助手**三层的效果。
@@ -467,8 +467,8 @@ cd agent; .venv\Scripts\python.exe -m pytest tests\   # AI 侧 42 项
 
 | 想了解 | 看这份 |
 |---|---|
-| AI 到底有没有用（有数据） | [评测结论](eval-findings.md) |
-| AI 怎么写操作、人工确认怎么做 | [M4 HITL 实现说明](m4-hitl.md) |
-| 搜索与比价是怎么做的 | [B2 改动记录](b2-search-and-pricing.md) |
-| 后端做对了哪些事 | [M1/M2 改造记录](m1-m2-changelog.md) |
+| AI 到底有没有用（有数据） | [评测结论](evaluation-findings.md) |
+| AI 怎么写操作、人工确认怎么做 | [M4 HITL 实现说明](agent-hitl.md) |
+| 搜索与比价是怎么做的 | [B2 改动记录](archive/b2-search-and-pricing.md) |
+| 后端做对了哪些事 | [M1/M2 改造记录](archive/m1-m2-changelog.md) |
 | Python 侧怎么对接 | [Agent 接口约定](agent-api.md) |

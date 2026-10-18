@@ -1,6 +1,9 @@
 # B2 改动记录：强化搜索框 + 比价独立成功能
 
-**背景**：B 阶段评测（[eval-findings.md](eval-findings.md)）给出的行动顺序是
+> **已归档（历史记录）。** 本文记录当时的改动过程与验证结果，
+> 内容可能与当前代码不一致；现行设计请从 [文档索引](../README.md) 进入。
+
+**背景**：B 阶段评测（[evaluation-findings.md](../evaluation-findings.md)）给出的行动顺序是
 **先修检索、再把不需要 LLM 的能力从 agent 里拿出来**。本次落地这两项。
 
 ---
@@ -131,7 +134,7 @@ CREATE INDEX idx_product_filter ON product(status, category_name, price);
 | 测试 | 数量 | 覆盖 |
 |---|---|---|
 | `PriceComparisonFallbackTest` | 6 | 分类不存在 / 不放宽 / 放宽需标注 / 样本充足给结论 / 无目标价不判高低 / 成色降级 |
-| `infra/search-pricing-test.py` | 21 | 两个功能的端到端 HTTP 验证 |
+| `infra/tools/search-pricing-test.py` | 21 | 两个功能的端到端 HTTP 验证 |
 
 ### 4.2 回归
 
@@ -175,7 +178,7 @@ PASS 分类存在但无货时说明样本不足   samples=0
 > **找东西升到 100%，条件筛选却从 100% 掉到 71%** ——
 > 模型为了让结果非空，把用户的价格上限也一起放宽了，
 > 「50 块以下的自行车」被回答成「捷安特 ¥350」。
-> 最终按条件分支处理，详见 [评测结论 7.2](eval-findings.md)。
+> 最终按条件分支处理，详见 [评测结论 7.2](../evaluation-findings.md)。
 
 ---
 

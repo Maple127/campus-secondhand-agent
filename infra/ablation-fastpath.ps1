@@ -102,9 +102,9 @@ $tokenCut = [math]::Round(100.0 * ($agent.avg_tokens_in - $fast.avg_tokens_in) /
 "  输入 token：{0} → {1}（省 {2}%）" -f $agent.avg_tokens_in, $fast.avg_tokens_in, $tokenCut
 
 @{ experiment = 'E5-fast-path'; fast = $fast; agent = $agent } |
-    ConvertTo-Json -Depth 6 | Set-Content (Join-Path $LogDir 'ablation-e5.json') -Encoding UTF8
+    ConvertTo-Json -Depth 6 | Set-Content (Join-Path $LogDir 'results\ablation-e5.json') -Encoding UTF8
 
 Stop-Agent
 Start-Agent @{}
 "`n已恢复 agent（默认配置）"
-"结果：$LogDir\ablation-e5.json"
+"结果：$LogDir\results\ablation-e5.json"

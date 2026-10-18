@@ -1,6 +1,9 @@
 # 界面问题修复记录（8 项）
 
-反馈来源：用户实测。全部已修复并在 `infra/ui-fix-verify.py` 里逐条断言（29 项，全通过）。
+> **已归档（历史记录）。** 本文记录当时的改动过程与验证结果，
+> 内容可能与当前代码不一致；现行设计请从 [文档索引](../README.md) 进入。
+
+反馈来源：用户实测。全部已修复并在 `infra/tools/ui-fix-verify.py` 里逐条断言（29 项，全通过）。
 
 ---
 
@@ -160,7 +163,7 @@ id=1  高等数学   seller_id=2   seller_name=user01   ← 名字是 user01，i
 ## 验证
 
 ```
-infra/ui-fix-verify.py      29/29 通过（8 个问题逐条断言）
+infra/tools/ui-fix-verify.py      29/29 通过（8 个问题逐条断言）
 infra/smoke-test.ps1        19/19 通过
 后端单元测试                 44/44 通过
 Agent 单元测试               42/42 通过

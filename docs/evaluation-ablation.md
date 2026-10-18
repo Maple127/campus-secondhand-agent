@@ -1,4 +1,4 @@
-# 消融评测
+# 消融评测：每个组件值多少
 
 > 目的：把"某个组件有用"从**感觉**变成**可归因的数字**。
 >
@@ -16,7 +16,7 @@ infra/ablation-tag.ps1
 infra/ablation-agent.ps1
 ```
 
-原始结果：`infra/ablation-e1.json`、`infra/ablation-agent.json`。
+原始结果：`infra/results/ablation-e1.json`、`infra/ablation-agent.json`。
 
 ---
 

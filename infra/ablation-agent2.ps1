@@ -180,9 +180,9 @@ if (-not $SkipE2) {
     }
 }
 
-$summary | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $LogDir 'ablation-agent2.json') -Encoding UTF8
+$summary | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $LogDir 'results\ablation-agent2.json') -Encoding UTF8
 
 Stop-Agent
 Start-Agent @{}
 "`n已恢复 agent（默认配置）"
-"结果：$LogDir\ablation-agent2.json"
+"结果：$LogDir\results\ablation-agent2.json"

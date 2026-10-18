@@ -1,4 +1,4 @@
-# 品类词（product_type）：用标签解决"搜不到"
+# 品类词：用标签解决「搜不到」
 
 ## 一、为什么做这件事
 
@@ -19,7 +19,7 @@ lookup 从 62% 提到 100%。**但那不是修好，是用模型算力兜底**�
 原来的计划是上向量检索。后来改了主意，理由有二：
 
 1. **"AirPods 是耳机"是一个事实，不是语义相似度。** 事实应该用词表表达，确定、可解释、可审核。
-2. **买家是"想好了才搜"**（见 [评测结论](eval-findings.md) 的讨论）。
+2. **买家是"想好了才搜"**（见 [评测结论](../evaluation-findings.md) 的讨论）。
    用户不会搜「宿舍能用的小电器」这种运营位的说法，会搜「台灯」「耳机」「自行车」。
    既然意图明确，需要的是**词汇覆盖**，不是模糊匹配。
 
@@ -245,8 +245,8 @@ ALTER TABLE product_type
 | `templates/publish.html` | 品类下拉 + 标题自动猜 + 提示 |
 | `agent/app/tools.py` | 工具输出带上 `productType` |
 | `infra/product-types.sql` | 词表种子 + 现有商品回填 |
-| `infra/tag-validation.py` | 离线对比（LIKE vs 标签），含双向/单向对照 |
-| `infra/tag-verify-api.py` | 真实接口验证 30 条查询 |
+| `infra/tools/tag-validation.py` | 离线对比（LIKE vs 标签），含双向/单向对照 |
+| `infra/tools/tag-verify-api.py` | 真实接口验证 30 条查询 |
 
 ---
 

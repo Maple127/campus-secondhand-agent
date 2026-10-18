@@ -1,5 +1,8 @@
 # M1 + M2 改造记录
 
+> **已归档（历史记录）。** 本文记录当时的改动过程与验证结果，
+> 内容可能与当前代码不一致；现行设计请从 [文档索引](../README.md) 进入。
+
 **阶段**：后端加固（M1）+ Agent 接口层（M2）
 **范围**：`backend/`、`infra/`、`docs/`
 **状态**：已完成并通过验证
@@ -193,7 +196,7 @@ agent 发布进入待审核、scope 提权被过滤、未登录会话请求被�
 
 ## 七、下一步
 
-接口契约已就绪（见 [`agent-api.md`](agent-api.md)），Python Agent 可独立开发，不需改动 Java。
+接口契约已就绪（见 [`agent-api.md`](../agent-api.md)），Python Agent 可独立开发，不需改动 Java。
 
 建议顺序：
 
@@ -204,4 +207,4 @@ agent 发布进入待审核、scope 提权被过滤、未登录会话请求被�
 5. 站内消息 + Copilot 起草
 6. 黄金指令集评测
 
-详见 [`../agent/README.md`](../agent/README.md)。
+详见 [`../../agent/README.md`](../../agent/README.md)。

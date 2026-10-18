@@ -7,7 +7,7 @@
 #   （中间商品从 22 件扩到 158 件）。两个数字不能直接相减，
 #   差值里有数据变化，不只是品类词的贡献。
 #
-# 复用 infra/tag-verify-api.py 作为唯一的用例来源，避免两份查询清单漂移。
+# 复用 infra/tools/tag-verify-api.py 作为唯一的用例来源，避免两份查询清单漂移。
 
 param(
     [string]$Jar = 'D:\Develop\AI\deepseek\test2\backend\target\campus-backend-0.2.0-SNAPSHOT.jar',
@@ -16,7 +16,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$verify = 'D:\Develop\AI\deepseek\test2\infra\tag-verify-api.py'
+$verify = 'D:\Develop\AI\deepseek\test2\infra\tools\tag-verify-api.py'
 
 function Stop-Backend {
     Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue |
@@ -78,8 +78,8 @@ try {
     "  多召回：{0} 条" -f ($on.hit - $off.hit)
 
     @{ experiment = 'E1-tag-matching'; off = $off; on = $on } |
-        ConvertTo-Json -Depth 5 | Set-Content (Join-Path $LogDir 'ablation-e1.json') -Encoding UTF8
-    "已写入 $LogDir\ablation-e1.json"
+        ConvertTo-Json -Depth 5 | Set-Content (Join-Path $LogDir 'results\ablation-e1.json') -Encoding UTF8
+    "已写入 $LogDir\results\ablation-e1.json"
 }
 finally {
     Stop-Backend

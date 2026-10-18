@@ -1,4 +1,4 @@
-# Agent 接口约定（Python 侧对接说明）
+# Agent 接口约定
 
 本文档面向 `agent/` 下的 Python 服务，说明如何安全地调用后端业务接口。
 

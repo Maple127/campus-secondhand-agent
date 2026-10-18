@@ -177,4 +177,4 @@ Agent 不签发令牌、不接触密码。令牌只存前端内存变量，刷�
 3. 黄金指令集评测（含幂等命中率、越权拒绝率）
 4. 确认超时与清理
 
-详见 [../docs/m4-hitl.md](../docs/m4-hitl.md)。
+详见 [../docs/agent-hitl.md](../docs/agent-hitl.md)。

@@ -178,7 +178,7 @@ cd agent && .venv\Scripts\python.exe -m eval.snapshot
 ## 七、B2 落地后的复测结果
 
 按上面的结论做了两项改动（强化搜索框 + 比价独立成功能，见
-[b2-search-and-pricing.md](b2-search-and-pricing.md)），并顺手修掉评测暴露出的两个 agent 行为问题。
+[b2-search-and-pricing.md](archive/b2-search-and-pricing.md)），并顺手修掉评测暴露出的两个 agent 行为问题。
 
 ### 7.1 复测数据
 

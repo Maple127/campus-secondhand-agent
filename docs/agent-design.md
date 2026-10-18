@@ -1,4 +1,4 @@
-# Agent 核心实现说明
+# Agent 设计：数据流、工具与幻觉抑制
 
 **阶段**：M3（只读工具 + SSE 流式对话）
 **技术栈**：Python 3.11 + FastAPI + LangChain v1 + LangGraph + DeepSeek
