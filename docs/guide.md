@@ -468,7 +468,7 @@ cd agent; .venv\Scripts\python.exe -m pytest tests\   # AI 侧 42 项
 | 想了解 | 看这份 |
 |---|---|
 | AI 到底有没有用（有数据） | [评测结论](evaluation-findings.md) |
-| AI 怎么写操作、人工确认怎么做 | [M4 HITL 实现说明](agent-hitl.md) |
-| 搜索与比价是怎么做的 | [B2 改动记录](archive/b2-search-and-pricing.md) |
-| 后端做对了哪些事 | [M1/M2 改造记录](archive/m1-m2-changelog.md) |
+| AI 怎么写操作、人工确认怎么做 | [写操作与人工确认](agent-hitl.md) |
+| 搜索为什么能搜到 | [品类词](deep-dives/product-types.md) |
+| 后端业务规则 | [后端业务规则](backend.md) |
 | Python 侧怎么对接 | [Agent 接口约定](agent-api.md) |

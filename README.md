@@ -114,10 +114,11 @@ CI 配置在 `.github/workflows/ci.yml`：后端测试 + ruff + mypy + agent 测
 | 想了解 | 直接看 |
 |---|---|
 | 怎么跑起来 | [使用指南](docs/guide.md) |
+| 后端业务规则 | [状态机 / 审核 / 并发 / 权限](docs/backend.md) |
 | Agent 怎么设计 | [Agent 设计](docs/agent-design.md) · [人工确认](docs/agent-hitl.md) |
 | 到底有没有用 | [价值评测](docs/evaluation-findings.md) · [消融评测](docs/evaluation-ablation.md) |
 | 某个设计怎么权衡 | [路由](docs/deep-dives/routing.md) · [注入防护](docs/deep-dives/injection.md) · [议价](docs/deep-dives/negotiation.md) · [品类词](docs/deep-dives/product-types.md) |
-| 哪里还站不住 | [面试自检表](docs/interview-map.md) |
+| 哪里还站不住 | [已知限制](docs/limitations.md) · [面试自检表](docs/interview-map.md) |
 
 ---
 
@@ -129,7 +130,7 @@ CI 配置在 `.github/workflows/ci.yml`：后端测试 + ruff + mypy + agent 测
 - **评测是单次运行**：同一配置三次跑出 87/83/97，方差很大，没有做 pass^k
 - **端到端没测瞬时故障**：重试的正收益只在单元测试里验证过
 
-这些限制不是谦虚，是 [面试自检表](docs/interview-map.md) 里"⬜ 还没有"的部分。
+完整清单（含"做了但不够好""验证不足""结构性风险"）在 [已知限制](docs/limitations.md)。
 
 ---
 

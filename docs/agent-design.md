@@ -1,6 +1,6 @@
 # Agent 设计：数据流、工具与幻觉抑制
 
-**阶段**：M3（只读工具 + SSE 流式对话）
+**范围**：只读工具 + SSE 流式对话
 **技术栈**：Python 3.11 + FastAPI + LangChain v1 + LangGraph + DeepSeek
 **状态**：已完成并通过真实端到端验证
 

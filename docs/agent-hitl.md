@@ -1,8 +1,7 @@
 # 写操作与人工确认（HITL）
 
-**阶段**：M4
+**范围**：`agent/`（后端接口已就绪，本轮零改动）
 **状态**：已完成并通过真实端到端验证
-**范围**：`agent/`（后端接口在 M2 已就绪，本轮零改动）
 
 ---
 
@@ -246,7 +245,7 @@ PASS duplicate confirmation does not duplicate product  count=1
 PASS no pending after completion
 PASS no pay tool offered to model
 
-M4 E2E TOTAL=14  PASS=14  FAIL=0
+HITL E2E TOTAL=14  PASS=14  FAIL=0
 ```
 
 其中最关键的一条是 `duplicate confirmation does not duplicate product`：
@@ -266,9 +265,9 @@ M4 E2E TOTAL=14  PASS=14  FAIL=0
 PASS: 商品已创建且为待审核 (count=1, status=PENDING_APPROVAL)
 ```
 
-### 6.4 回归验证（M3 与 Java 侧未被破坏）
+### 6.4 回归验证（只读能力与 Java 侧未被破坏）
 
-- M3 只读 E2E：13/13
+- 只读 E2E：13/13
 - Java 冒烟测试：19/19
 - Agent 单元测试：39/39
 
@@ -308,7 +307,7 @@ PASS: 商品已创建且为待审核 (count=1, status=PENDING_APPROVAL)
 
 ## 九、下一阶段建议
 
-M4 完成后，剩余工作按价值排序：
+写操作与人工确认完成后，剩余工作按价值排序：
 
 1. **站内消息 + Copilot 起草**（需先在后端建 `chat_thread` / `chat_message` 表）
 2. **ChromaDB 语义检索**（召回后须回主库复核状态）

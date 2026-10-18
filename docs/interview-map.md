@@ -66,7 +66,7 @@
 |---|---|---|---|
 | Agent 能不能替用户付款？ | 不能。`order:pay` 的 scope **永不授予** agent | `AgentAuthInterceptorScopeTest` | ✅ |
 | 权限怎么传递？ | 双层令牌：服务令牌证明"是内部服务"，能力令牌证明"以谁的身份"，scope 取交集，30 分钟过期 | `docs/agent-api.md` | ✅ |
-| 写操作怎么防误触？ | LangGraph `interrupt()` 挂起 + 确认卡片 + 指纹幂等账本（防重复执行） | `docs/m4-hitl.md` | ✅ |
+| 写操作怎么防误触？ | LangGraph `interrupt()` 挂起 + 确认卡片 + 指纹幂等账本（防重复执行） | `docs/agent-hitl.md` | ✅ |
 | 卖家能在商品描述里注入指令怎么办？ | 双防线：入口正则拦截 + 商品描述加不可信围栏；22 条测试（9 拦 / 9 不误杀） | `docs/injection-defense.md` | ✅ |
 | 工具集要不要按角色收窄？ | 应该。买家/卖家各一套工具子集，而不是 13 个工具通吃 | 参考 `_research/Adaptive-rag-2/app/agents/nodes/planner.py` | ⬜ |
 
@@ -74,7 +74,7 @@
 
 | 会被追问 | 我们的答案 | 证据 | 状态 |
 |---|---|---|---|
-| 为什么选 LangGraph？ | 需要 `interrupt()` 把图挂起、跨请求恢复、并持久化到 SQLite。裸循环做不到"进程重启后确认卡片还在" | `docs/m4-hitl.md` | ✅ |
+| 为什么选 LangGraph？ | 需要 `interrupt()` 把图挂起、跨请求恢复、并持久化到 SQLite。裸循环做不到"进程重启后确认卡片还在" | `docs/agent-hitl.md` | ✅ |
 | State 怎么设计？ | `messages` 用 `add_messages` reducer；会话按 `thread_id` 隔离；压缩时用 `REMOVE_ALL_MESSAGES` 整段替换保证摘要顺序 | `app/graph.py` | ✅ |
 | 两个用户同时下单怎么办？ | 乐观锁 `@Version`，后到的拿到 409 | 后端状态机测试 | ✅ |
 | 幂等键怎么算？ | SHA256(用户 + 工具 + 参数)，用户维度隔离 | `app/idempotency.py` | ✅ |
