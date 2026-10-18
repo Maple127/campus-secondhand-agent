@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>确认订单</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+        body { background-color: #f5f6f8; padding-bottom: 80px; }
+
+        header {
+            background: #fff;
+            height: 46px;
+            line-height: 46px;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 500;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        header a { position: absolute; left: 15px; top: 0; color: #333; text-decoration: none; font-size: 20px; }
+
+        .address-card {
+            background: #fff;
+            margin: 10px;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .address-icon { font-size: 24px; }
+        .address-info { flex: 1; }
+        .address-name { font-size: 15px; font-weight: 500; color: #333; }
+        .address-detail { font-size: 13px; color: #666; margin-top: 4px; }
+        .address-arrow { color: #ccc; font-size: 18px; }
+
+        .goods-card {
+            background: #fff;
+            margin: 10px;
+            border-radius: 10px;
+            display: flex;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .goods-img { width: 90px; height: 90px; border-radius: 6px; object-fit: cover; background: #eee; }
+        .goods-info { flex: 1; padding-left: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+        .goods-title { font-size: 15px; color: #333; }
+        .goods-price { color: #ff4400; font-size: 18px; font-weight: bold; }
+
+        .info-card {
+            background: #fff;
+            margin: 10px;
+            border-radius: 10px;
+            padding: 0 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            line-height: 44px;
+            font-size: 14px;
+            border-bottom: 1px solid #f2f2f2;
+            padding: 8px 0;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .label { color: #666; flex-shrink: 0; width: 80px; }
+        .info-row .value { color: #333; flex: 1; }
+        .value-red { color: #ff4400; font-weight: 500; }
+
+        .info-row-column { flex-direction: column; align-items: stretch; padding: 12px 0; }
+
+        .datetime-input {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            background: #fafafa;
+        }
+        .datetime-input:focus { border-color: #667eea; background: #fff; }
+
+        .pay-bar-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-top: 1px solid #eee;
+            z-index: 10;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+        }
+        .total-text { flex: 1; font-size: 15px; }
+        .total-price { color: #ff4400; font-size: 22px; font-weight: bold; }
+        .submit-btn {
+            width: 130px;
+            height: 44px;
+            border-radius: 22px;
+            border: none;
+            background: linear-gradient(135deg, #ff735c, #ff4400);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .bottom-placeholder { height: 70px; }
+        .hint-text { font-size: 12px; color: #999; margin-top: 4px; }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            width: 200px;
+            background: #fafafa;
+            outline: none;
+        }
+        select:focus { border-color: #667eea; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="javascript:history.back()">←</a>
+    确认订单
+</header>
+
+
+
+<!-- 商品信息 -->
+<div class="goods-card">
+    <img class="goods-img" th:src="${product.image}" alt="商品图片" onerror="this.src='/images/default.png'">
+    <div class="goods-info">
+        <div class="goods-title" th:text="${product.name}"></div>
+        <div class="goods-price">¥<span th:text="${product.price}"></span></div>
+    </div>
+</div>
+
+<!-- ⭐ 表单 -->
+<form id="orderForm" action="/order/create" method="post">
+    <input type="hidden" name="productId" th:value="${product.id}">
+
+    <div class="info-card">
+        <!-- 交易方式 -->
+        <div class="info-row">
+            <div class="label">交易方式</div>
+            <div class="value">
+                <select name="deliveryType">
+                    <option value="PICKUP">📦 自提</option>
+                    <option value="DELIVERY">🚚 配送</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 预约时间 -->
+        <div class="info-row info-row-column">
+            <div style="display:flex; align-items:center; width:100%;">
+                <span class="label" style="flex-shrink:0; width:80px;">预约时间</span>
+                <span style="color:#ff4400;font-size:16px;margin-right:8px;">*</span>
+                <input type="datetime-local"
+                       id="appointmentTime"
+                       name="appointmentTime"
+                       class="datetime-input"
+                       required>
+            </div>
+            <div class="hint-text">💡 请选择您方便的交易时间</div>
+        </div>
+
+        <div class="info-row">
+            <div class="label">卖家</div>
+            <div class="value" th:text="${product.sellerName}"></div>
+        </div>
+
+        <div class="info-row">
+            <div class="label">订单状态</div>
+            <div class="value value-red">待付款</div>
+        </div>
+    </div>
+
+    <div class="bottom-placeholder"></div>
+
+    <!-- 底部按钮 -->
+    <div class="pay-bar-fixed">
+        <div class="total-text">
+            实付：<span class="total-price">¥<span th:text="${product.price}"></span></span>
+        </div>
+        <button class="submit-btn" type="submit" id="submitBtn">提交订单</button>
+    </div>
+</form>
+
+<script>
+    // 设置默认时间
+    window.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        now.setHours(now.getHours() + 1);
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('appointmentTime').value = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+    });
+
+    // 表单提交验证
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        const timeInput = document.getElementById('appointmentTime');
+        if (timeInput.value === '') {
+            e.preventDefault();
+            alert('请选择预约交易时间');
+            timeInput.focus();
+            return false;
+        }
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = '提交中...';
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card h2 {
+            margin: 0 0 20px 0;
+            color: #333;
+        }
+
+        .product-info {
+            display: flex;
+            gap: 30px;
+        }
+
+        .product-image {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .detail-row {
+            margin-bottom: 15px;
+        }
+
+        .detail-row label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .status-pending {
+            color: #f39c12;
+        }
+
+        .status-approved {
+            color: #27ae60;
+        }
+
+        .status-rejected {
+            color: #e74c3c;
+        }
+
+        .actions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .actions button {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+
+        .btn-approve {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-reject {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+    <div class="header">
+        <h1>校园二手交易平台 - 管理后台</h1>
+        <div>
+            <span>欢迎, [[${admin.username}]]</span>
+            <a href="/admin/dashboard">首页</a>
+            <a href="/admin/logout">退出登录</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="product-card">
+            <h2>商品详情</h2>
+
+            <div class="product-info">
+                <div>
+                    <img th:if="${product.image != null}" th:src="${product.image}" class="product-image">
+                    <div th:else class="product-image" style="display:flex;align-items:center;justify-content:center;">
+                        暂无图片
+                    </div>
+                </div>
+
+                <div class="product-details">
+                    <div class="detail-row">
+                        <label>商品名称：</label>
+                        <span>[[${product.name}]]</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>商品描述：</label>
+                        <span>[[${product.description != null ? product.description : '暂无'}]]</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>价格：</label>
+                        <span>¥[[${product.price}]]</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>交易地点：</label>
+                        <span>[[${product.location != null ? product.location : '暂无'}]]</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>卖家：</label>
+                        <span>[[${product.sellerName}]]</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>分类：</label>
+                        <span>[[${product.categoryName != null ? product.categoryName : '未分类'}]]</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>审核状态：</label>
+                        <span
+                            th:class="${product.status == 0 ? 'status-pending' : product.status == 1 ? 'status-approved' : 'status-rejected'}">
+                            [[${product.status == 0 ? '待审核' : product.status == 1 ? '已通过' : '已拒绝'}]]
+                        </span>
+                    </div>
+                    <div th:if="${product.status == 2 && product.rejectReason != null}" class="detail-row">
+                        <label>拒绝原因：</label>
+                        <span class="status-rejected">[[${product.rejectReason}]]</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>发布时间：</label>
+                        <span>[[${product.createTime}]]</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <th:block th:if="${product.status == 0}">
+                    <form action="/admin/product/[[${product.id}]]/approve" method="post" style="display:inline;">
+                        <button type="submit" class="btn-approve">审核通过</button>
+                    </form>
+                    <button class="btn-reject" onclick="showReject()">拒绝审核</button>
+                    <div id="rejectSection" style="display:none;">
+                        <form action="/admin/product/[[${product.id}]]/reject" method="post">
+                            <textarea name="rejectReason" placeholder="请输入拒绝原因..." required></textarea>
+                            <button type="button" onclick="cancelReject()" style="margin-left:0;">取消</button>
+                            <button type="submit" class="btn-reject">确认拒绝</button>
+                        </form>
+                    </div>
+                </th:block>
+                <form action="/admin/product/[[${product.id}]]/delete" method="post" style="display:inline;">
+                    <button type="submit" class="btn-back" onclick="return confirm('确定删除此商品？')">删除商品</button>
+                </form>
+                <a href="/admin/products?status=0"><button class="btn-back">返回列表</button></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showReject() {
+            document.getElementById('rejectSection').style.display = 'block';
+        }
+
+        function cancelReject() {
+            document.getElementById('rejectSection').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

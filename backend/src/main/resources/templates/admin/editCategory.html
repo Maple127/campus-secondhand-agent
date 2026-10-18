@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑分类</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 30px auto;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin: 0 0 20px 0;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        button {
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-left: 15px;
+            color: #666;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+    <div class="header">
+        <h1>校园二手交易平台 - 管理后台</h1>
+        <div>
+            <span>欢迎, [[${admin.username}]]</span>
+            <a href="/admin/dashboard">首页</a>
+            <a href="/admin/logout">退出登录</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h2>编辑分类</h2>
+            <div th:if="${error}" class="error">[[${error}]]</div>
+            <form th:action="@{'/admin/category/' + ${category.id} + '/edit'}" method="post">
+                <div class="form-group">
+                    <label for="name">分类名称</label>
+                    <input type="text" id="name" name="name" th:value="${category.name}" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">描述（可选）</label>
+                    <textarea id="description" name="description" th:text="${category.description}"></textarea>
+                </div>
+                <button type="submit">保存修改</button>
+                <a href="/admin/categories" class="back-link">返回</a>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

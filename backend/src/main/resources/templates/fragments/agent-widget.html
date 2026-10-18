@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 助手组件片段</title>
+</head>
+<body>
+
+<!--
+  AI 助手悬浮抽屉（可复用片段）
+  用法：在页面 </body> 前加入
+      <div th:replace="~{fragments/agent-widget :: widget}"></div>
+      <script th:src="@{/js/agent-widget.js}"></script>
+
+  设计说明：
+    - 只在登录后渲染（未登录时 agent 拿不到 capability token）
+    - 令牌由前端向 Java 后端 POST /api/v1/agent/session 换取，之后再调 Python agent
+    - 令牌只存在内存变量里，不写 localStorage，刷新即失效
+-->
+<div th:fragment="widget"
+     th:if="${loginUser != null}"
+     id="agentWidget"
+     th:attr="data-agent-url=${agentUrl} ?: 'http://127.0.0.1:8090',
+              data-service-token=${agentServiceToken} ?: 'demo-agent-token-local'">
+
+    <!-- 悬浮按钮 -->
+    <button id="agentFab" type="button" title="AI 助手">
+        <span class="agent-fab-icon">🤖</span>
+        <span class="agent-fab-text">AI 助手</span>
+    </button>
+
+    <!-- 对话抽屉 -->
+    <section id="agentPanel" class="agent-panel" aria-hidden="true">
+        <header class="agent-head">
+            <div>
+                <strong>AI 助手</strong>
+                <small id="agentStatus">正在连接…</small>
+            </div>
+            <div class="agent-head-actions">
+                <button type="button" id="agentReset" title="开启新会话">新会话</button>
+                <button type="button" id="agentClose" title="收起">✕</button>
+            </div>
+        </header>
+
+        <div id="agentLog" class="agent-log">
+            <div class="agent-hint">
+                试着说：<br>
+                · 「有没有便宜点的耳机？」<br>
+                · 「500 以内的数码产品」<br>
+                · 「帮我发布一件闲置：台灯 45 元 9成新」<br>
+                · 「帮我看看我的订单」<br>
+                <br>
+                发布、下单等会改动数据的操作，都会先弹确认卡片，你点了才会执行。
+            </div>
+        </div>
+
+        <footer class="agent-foot">
+            <textarea id="agentInput" rows="1"
+                      placeholder="用一句话告诉我要做什么…（Enter 发送，Shift+Enter 换行）"></textarea>
+            <button type="button" id="agentSend">发送</button>
+        </footer>
+    </section>
+</div>
+
+</body>
+</html>

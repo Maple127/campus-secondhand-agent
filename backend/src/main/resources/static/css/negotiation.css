@@ -1,0 +1,138 @@
+/* ============================================================
+   议价面板
+   作用域限制在 #negoPanel 内，避免污染商品页既有样式
+   ============================================================ */
+
+.nego-panel {
+    margin: 14px 0 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e6e0f5;
+    background: #fff;
+}
+
+.nego-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 15px;
+    border: none;
+    background: linear-gradient(160deg, #f7f5ff, #eef1fb);
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+}
+
+.nego-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a4270;
+}
+
+.nego-hint {
+    font-size: 12px;
+    color: #8b86a8;
+}
+
+.nego-body {
+    padding: 14px 15px 16px;
+}
+
+.nego-verdict {
+    font-size: 13.5px;
+    line-height: 1.7;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: #f6f7fb;
+    color: #4a5470;
+}
+
+.nego-verdict.fair      { background: #dcfce7; color: #166534; }
+.nego-verdict.high      { background: #fef3c7; color: #92400e; }
+.nego-verdict.expensive { background: #fee2e2; color: #991b1b; }
+.nego-verdict.unknown   { background: #f1f5f9; color: #64748b; }
+
+/* ---------- 三档价格 ---------- */
+.nego-prices {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.nego-price {
+    flex: 1;
+    background: #fafbff;
+    border: 1px solid #eef0f8;
+    border-radius: 10px;
+    padding: 9px 6px;
+    text-align: center;
+}
+
+.nego-label {
+    font-size: 11px;
+    color: #98a0b8;
+    margin-bottom: 3px;
+}
+
+.nego-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.nego-value.open   { color: #667eea; }
+.nego-value.target { color: #16a34a; }
+.nego-value.walk   { color: #dc2626; }
+
+/* ---------- 依据 ---------- */
+.nego-reason {
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+/* ---------- 话术 ---------- */
+.nego-script-wrap {
+    position: relative;
+    background: #f8f9ff;
+    border: 1px dashed #d8ddf0;
+    border-radius: 10px;
+    padding: 11px 52px 11px 12px;
+}
+
+.nego-script {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #3f4a68;
+    white-space: pre-wrap;
+}
+
+.nego-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 7px;
+    background: #667eea;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.nego-copy:active { transform: scale(.97); }
+
+.nego-tip {
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: #9aa2b8;
+    line-height: 1.7;
+}
+
+@media (max-width: 420px) {
+    .nego-value { font-size: 14px; }
+    .nego-label { font-size: 10.5px; }
+}

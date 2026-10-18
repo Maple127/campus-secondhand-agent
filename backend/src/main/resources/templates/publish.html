@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>发布闲置 - 校园二手交易</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing:border-box; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+        body { margin:0; background:#f5f5f5; }
+
+        header {
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff; padding:14px 20px;
+            display:flex; align-items:center; gap:12px;
+        }
+        header a { color:#fff; text-decoration:none; font-size:20px; }
+        header h1 { font-size:18px; margin:0; }
+
+        .form-box {
+            max-width:600px; margin:20px auto;
+            background:#fff; border-radius:14px;
+            padding:24px; box-shadow:0 2px 12px rgba(0,0,0,.06);
+        }
+
+        .field { margin-bottom:18px; }
+        .field label { display:block; font-size:14px; color:#333; margin-bottom:8px; font-weight:600; }
+        .field input[type=text],
+        .field input[type=number],
+        .field textarea {
+            width:100%; padding:12px; border:1px solid #e3e3e3;
+            border-radius:10px; font-size:14px; background:#fafafa;
+        }
+        .field textarea { min-height:90px; resize:vertical; }
+
+        .file-tip { font-size:12px; color:#999; margin-top:6px; }
+        #preview { margin-top:10px; max-width:100%; border-radius:10px; display:none; }
+
+        .submit-btn {
+            width:100%; padding:14px; border:none; border-radius:25px;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff; font-size:16px; font-weight:600; cursor:pointer;
+        }
+
+        .error {
+            background:#fdecea; color:#c62828; padding:10px 14px;
+            border-radius:8px; font-size:14px; margin-bottom:16px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a th:href="@{/home}">⬅️</a>
+    <h1>发布闲置</h1>
+</header>
+
+<div class="form-box">
+
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+
+    <form th:action="@{/publish}" method="post" enctype="multipart/form-data">
+
+        <div class="field">
+            <label>商品名称 *</label>
+            <input type="text" name="name" required maxlength="50" placeholder="例如：高等数学第七版">
+        </div>
+
+        <!-- 分类与成色放在价格前面：它们是定价参考的输入条件，
+             先填这两项，价格一敲就能立刻看到行情建议 -->
+        <div class="field">
+            <label>商品分类 *</label>
+            <select name="category" id="pubCategory" required style="width:100%; padding:12px; border:1px solid #e3e3e3; border-radius:10px; font-size:14px; background:#fafafa;">
+                <option value="">请选择分类</option>
+                <option value="图书教材">📚 图书教材</option>
+                <option value="数码电子">💻 数码电子</option>
+                <option value="生活用品">🛏️ 生活用品</option>
+                <option value="体育器材">🚲 体育器材</option>
+                <option value="其他">📦 其他</option>
+            </select>
+        </div>
+
+        <!-- 品类词：比分类细一档。买家搜「耳机」时，只有标了「耳机」的商品才找得到 ——
+             这条比任何文案技巧都更能决定有没有人看见。 -->
+        <div class="field">
+            <label>商品品类</label>
+            <select name="productType" id="pubType"
+                    style="width:100%; padding:12px; border:1px solid #e3e3e3; border-radius:10px; font-size:14px; background:#fafafa;">
+                <option value="">先选分类</option>
+            </select>
+            <div class="file-tip">选对品类，买家搜「耳机」「充电宝」时才找得到</div>
+            <div id="typeHint" style="font-size:12px; color:#667eea; margin-top:6px; display:none;"></div>
+        </div>
+
+        <div class="field">
+            <label>成色</label>
+            <select name="conditionLevel" id="pubCondition" style="width:100%; padding:12px; border:1px solid #e3e3e3; border-radius:10px; font-size:14px; background:#fafafa;">
+                <option value="">不填</option>
+                <option value="全新">全新</option>
+                <option value="9成新">9成新</option>
+                <option value="8成新">8成新</option>
+                <option value="7成新">7成新</option>
+                <option value="6成新及以下">6成新及以下</option>
+            </select>
+            <div class="file-tip">填了成色，定价参考会更准</div>
+        </div>
+
+        <div class="field">
+            <label>价格（元）*</label>
+            <input type="number" name="price" id="pubPrice" step="0.01" min="0"
+                   required placeholder="例如：15">
+            <!-- 定价参考：纯后端统计，不经过 LLM。
+                 分类/成色/价格任一变化即刷新（带防抖） -->
+            <div th:replace="~{fragments/price-insight :: panel}"></div>
+        </div>
+
+        <div class="field">
+            <label>交易地点</label>
+            <input type="text" name="location" maxlength="100" placeholder="例如：3号宿舍楼 / 图书馆">
+        </div>
+
+        <div class="field">
+            <label>商品描述</label>
+            <textarea name="description" maxlength="2000" placeholder="描述一下成色、使用情况等"></textarea>
+        </div>
+
+        <div class="field">
+            <label>商品图片</label>
+            <input type="file" name="image" accept="image/*" onchange="previewImage(this)">
+            <div class="file-tip">支持 jpg / png，最大 10MB</div>
+            <img id="preview" alt="预览">
+        </div>
+
+        <button type="submit" class="submit-btn">发布</button>
+    </form>
+</div>
+
+<script>
+    function previewImage(input) {
+        const preview = document.getElementById('preview');
+        if (input.files && input.files[0]) {
+            preview.src = URL.createObjectURL(input.files[0]);
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+</script>
+
+<!-- 定价参考：选完分类/成色、填了价格就实时给行情建议 -->
+<link rel="stylesheet" th:href="@{/css/price-insight.css}">
+<script th:src="@{/js/price-insight.js}"></script>
+<script>
+    (function () {
+        var catEl = document.getElementById('pubCategory');
+        var conEl = document.getElementById('pubCondition');
+        var priceEl = document.getElementById('pubPrice');
+        var typeEl = document.getElementById('pubType');
+
+        function refresh() {
+            var category = catEl.value;
+            var condition = conEl.value;
+            var price = priceEl.value === '' ? null : Number(priceEl.value);
+            // 分类为空时不请求：没有分类的"全平台均价"没有参考意义
+            if (!category) return;
+            // 带上品类词：定价参考会从"数码电子"收窄到"耳机"
+            PriceInsight.update({
+                category: category,
+                type: typeEl ? typeEl.value : null,
+                condition: condition,
+                price: price
+            });
+        }
+
+        PriceInsight.init({ scope: 'publish', compact: true });
+
+        catEl.addEventListener('change', function () {
+            // 分类变了，缓存键也要重置，否则相同 URL 会被判为"没变"而不请求
+            PriceInsight._reset();
+            refresh();
+        });
+        conEl.addEventListener('change', refresh);
+        priceEl.addEventListener('input', refresh);
+        if (typeEl) {
+            // 换品类也要重算：缓存键要重置，否则相同 URL 会被判为"没变"
+            typeEl.addEventListener('change', function () {
+                PriceInsight._reset();
+                refresh();
+            });
+        }
+    })();
+</script>
+
+<!-- 品类预选：分类决定候选，标题决定预选哪一个。卖家只需要看一眼、必要时改一下。 -->
+<script>
+    (function () {
+        var catEl = document.getElementById('pubCategory');
+        var typeEl = document.getElementById('pubType');
+        var nameEl = document.querySelector('input[name="name"]');
+        var hintEl = document.getElementById('typeHint');
+        var lastAutoValue = '';   // 记录我们自动选过的值，避免覆盖卖家手动选择
+        var timer = null;
+
+        function fillOptions(names, selected) {
+            typeEl.innerHTML = '';
+            var blank = document.createElement('option');
+            blank.value = '';
+            blank.textContent = names.length ? '不选（不影响发布）' : '该分类暂无品类词';
+            typeEl.appendChild(blank);
+            names.forEach(function (n) {
+                var o = document.createElement('option');
+                o.value = n;
+                o.textContent = n;
+                if (n === selected) o.selected = true;
+                typeEl.appendChild(o);
+            });
+        }
+
+        // 选分类 → 拉该分类下的品类词
+        function loadTypes(category) {
+            if (!category) {
+                fillOptions([], '');
+                hintEl.style.display = 'none';
+                return;
+            }
+            fetch('/web/product-types?category=' + encodeURIComponent(category))
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (b) {
+                    var names = ((b && b.data) || []).map(function (x) { return x.name; });
+                    fillOptions(names, '');
+                    suggest();
+                })
+                .catch(function () { fillOptions([], ''); });
+        }
+
+        // 标题 → 猜一个品类并预选（猜错无妨，卖家可以改）
+        function suggest() {
+            var title = (nameEl.value || '').trim();
+            var category = catEl.value;
+            if (!title || title.length < 2 || !category) return;
+
+            fetch('/web/product-types/suggest?title=' + encodeURIComponent(title)
+                  + '&category=' + encodeURIComponent(category))
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (b) {
+                    var s = b && b.data && b.data.suggested;
+                    if (!s) { hintEl.style.display = 'none'; return; }
+                    // 卖家自己改过就不再自动覆盖
+                    if (typeEl.value && typeEl.value !== lastAutoValue) return;
+                    typeEl.value = s;
+                    lastAutoValue = s;
+                    hintEl.textContent = '已根据标题猜为「' + s + '」，不对可以改';
+                    hintEl.style.display = 'block';
+                })
+                .catch(function () {});
+        }
+
+        catEl.addEventListener('change', function () {
+            lastAutoValue = '';
+            hintEl.style.display = 'none';
+            loadTypes(catEl.value);
+        });
+
+        nameEl.addEventListener('input', function () {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(suggest, 400);
+        });
+    })();
+</script>
+
+</body>
+</html>

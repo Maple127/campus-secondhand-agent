@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name} + ' - 校园二手交易'">商品详情</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing:border-box; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+        body { margin:0; background:#f5f5f5; padding-bottom:90px; }
+
+        header {
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff; padding:14px 20px;
+            display:flex; align-items:center; gap:12px;
+        }
+        header a { color:#fff; text-decoration:none; font-size:20px; }
+        header h1 { font-size:18px; margin:0; }
+
+        .product-img {
+            width:100%; max-height:360px; object-fit:cover; background:#eee; display:block;
+        }
+
+        .detail-box {
+            background:#fff; margin:12px; border-radius:14px;
+            padding:20px; box-shadow:0 2px 10px rgba(0,0,0,.06);
+        }
+
+        .price { color:#ff5000; font-weight:bold; font-size:26px; }
+        .name { font-size:18px; font-weight:600; margin:10px 0; }
+
+        .row { display:flex; padding:12px 0; border-top:1px solid #f0f0f0; font-size:14px; }
+        .row .label { width:90px; color:#999; }
+        .row .value { flex:1; color:#333; white-space:pre-wrap; }
+
+        .bottom-bar {
+            position:fixed; bottom:0; left:0; right:0;
+            background:#fff; border-top:1px solid #eee;
+            display:flex; align-items:center;
+            padding:10px 16px;
+            gap:18px;
+        }
+
+        /* 三个按钮均分宽度，统一 flex:1 */
+        .fav-btn {
+            flex:1;
+            padding:12px;
+            border-radius:25px;
+            border:1px solid #ff5000;
+            background:#fff;
+            color:#ff5000;
+            font-size:15px; font-weight:600;
+            cursor:pointer;
+        }
+        .fav-btn.active { background:#ff5000; color:#fff; }
+
+        .contact-btn {
+            flex:1;
+            padding:12px;
+            border-radius:25px;
+            border:none;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff; font-size:15px; font-weight:600; cursor:pointer;
+        }
+        .order-btn {
+            flex:1;
+            padding:12px;
+            border-radius:25px;
+            border:none;
+            background:linear-gradient(135deg,#ff735c,#ff4500);
+            color:#fff; font-size:15px; font-weight:600; cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a th:href="@{/home}">⬅️</a>
+    <h1>商品详情</h1>
+</header>
+
+<img class="product-img"
+     th:src="${product.image != null and !product.image.isEmpty()} ? ${product.image} : 'https://via.placeholder.com/600x400?text=暂无图片'"
+     alt="商品图片">
+
+<div class="detail-box">
+    <div class="price" th:text="'¥' + (${product.price != null} ? ${product.price} : '0')">¥0</div>
+    <div class="name" th:text="${product.name}">商品名称</div>
+
+    <!-- 价格参考：纯后端统计，不经过 LLM。
+         数据异步加载，拿不到就整块隐藏，不影响页面主流程 -->
+    <div th:replace="~{fragments/price-insight :: panel}"></div>
+
+    <!-- 议价面板：值不值 / 该出多少 / 怎么说。默认收起，点开才请求 -->
+    <div th:replace="~{fragments/negotiation-panel :: panel}"></div>
+
+    <div class="row">
+        <div class="label">交易地点</div>
+        <div class="value" th:text="${product.location != null and !product.location.isEmpty()} ? ${product.location} : '校园内'">地点</div>
+    </div>
+    <div class="row">
+        <div class="label">卖家</div>
+        <div class="value" th:text="${product.sellerName}">卖家</div>
+    </div>
+    <div class="row">
+        <div class="label">商品描述</div>
+        <div class="value" th:text="${product.description != null and !product.description.isEmpty()} ? ${product.description} : '卖家很懒，什么都没写~'">描述</div>
+    </div>
+</div>
+
+<div class="bottom-bar">
+    <form th:action="@{'/favorite/' + ${product.id}}" method="post" style="flex:1;">
+        <button type="submit"
+                th:classappend="${favorited} ? ' active' : ''"
+                class="fav-btn"
+                th:text="${favorited} ? '★ 已收藏' : '☆ 收藏'">收藏</button>
+    </form>
+    <button class="contact-btn" type="button" onclick="openReportModal()">举报</button>
+    <button class="contact-btn" type="button" onclick="showContactModal()">联系卖家</button>
+
+    <!-- 下单按钮的三种情况，都必须显式处理：
+         ① 自己的商品 —— 后端会拒绝，按钮不该出现
+         ② 非在售状态（已售出/待审核/已下架/已拒绝）—— 后端也会拒绝
+         ③ 在售且不是自己的 —— 正常下单
+         之前只处理了 ①，导致「已售出」的商品页还挂着"立即下单"，
+         用户点了才失败。 -->
+    <button th:if="${isOwner}" class="order-btn" type="button" disabled
+            style="background:#c9ccd6; cursor:default;"
+            title="这是你自己发布的商品">自己的商品</button>
+
+    <button th:if="${!isOwner and !canOrder}" class="order-btn" type="button" disabled
+            style="background:#c9ccd6; cursor:default;"
+            th:text="${notOnSaleLabel}">已售出</button>
+
+    <a th:if="${!isOwner and canOrder}"
+       th:href="@{/order/confirm(productId=${product.id})}">
+        <button class="order-btn">立即下单</button>
+    </a>
+</div>
+
+<!-- 举报提交后的反馈弹窗（原来完全没有反馈，用户以为没提交成功） -->
+<div th:replace="~{fragments/feedback-modal :: modal(
+        ${reportSubmitted}, '🚩', '举报已提交',
+        ${reportSubmittedMsg}, '确认', '')}"></div>
+
+<!-- 操作失败提示 -->
+<div th:replace="~{fragments/feedback-modal :: modal(
+        ${error != null}, '⚠️', '操作未完成', ${error}, '知道了', '')}"></div>
+
+<!-- 联系卖家弹窗 -->
+<div id="contactModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; display:none; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:30px 24px; width:300px; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+        <div style="font-size:18px; font-weight:600; margin-bottom:20px; color:#333;">联系卖家</div>
+        <div style="margin-bottom:12px; font-size:15px; color:#555;">
+            <span style="color:#999;">卖家：</span>
+            <span th:text="${product.sellerName}">卖家名</span>
+        </div>
+        <div style="margin-bottom:24px; font-size:15px; color:#555;">
+            <span style="color:#999;">电话：</span>
+            <span th:text="${product.sellerPhone != null and !product.sellerPhone.isEmpty()} ? ${product.sellerPhone} : '暂未提供'">电话号码</span>
+        </div>
+        <button onclick="closeContactModal()" style="width:100%; padding:12px; border:none; border-radius:25px; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; font-size:15px; font-weight:600; cursor:pointer;">确定</button>
+    </div>
+</div>
+
+<script>
+    function showContactModal() {
+        var modal = document.getElementById('contactModal');
+        modal.style.display = 'flex';
+    }
+    function closeContactModal() {
+        var modal = document.getElementById('contactModal');
+        modal.style.display = 'none';
+    }
+    // 点击遮罩层也可关闭
+    document.getElementById('contactModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeContactModal();
+        }
+    });
+</script>
+
+<!-- 举报模态弹窗 -->
+<div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3 style="margin-top: 0; color: #d9534f; border-bottom: 1px solid #eee; padding-bottom: 10px;">🚩 举报违规闲置</h3>
+        <form th:action="@{/report/submit}" method="post">
+            <input type="hidden" name="productId" th:value="${product.id}" />
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">选择违规类型 <span style="color:red;">*</span></label>
+                <select name="reasonType" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="">-- 请选择违规类型 --</option>
+                    <option value="虚假商品">虚假商品 / 与描述严重不符</option>
+                    <option value="违规物品">违规物品 / 禁售禁运品</option>
+                    <option value="价格欺诈">价格欺诈 / 标价与实际不符</option>
+                    <option value="广告骚扰">广告骚扰 / 导流至外部平台</option>
+                    <option value="其他违规">其他违规行为</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">补充证据说明 (可选)</label>
+                <textarea name="description" rows="3" placeholder="请详细描述相关违规事实，便于管理员快速判断核实..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeReportModal()" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">取消</button>
+                <button type="submit" style="background: #d9534f; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">提交举报</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openReportModal() {
+        document.getElementById('reportModal').style.display = 'flex';
+    }
+    function closeReportModal() {
+        document.getElementById('reportModal').style.display = 'none';
+    }
+</script>
+
+<!-- 价格参考组件 -->
+<link rel="stylesheet" th:href="@{/css/price-insight.css}">
+<script th:src="@{/js/price-insight.js}"></script>
+<script th:inline="javascript">
+    PriceInsight.init({
+        scope: 'product',
+        productId: /*[[${product.id}]]*/ 0
+    });
+</script>
+
+<!-- 议价面板 -->
+<link rel="stylesheet" th:href="@{/css/negotiation.css}">
+<script th:src="@{/js/negotiation.js}"></script>
+<script th:inline="javascript">
+    NegotiationPanel.init(/*[[${product.id}]]*/ 0);
+</script>
+
+<!-- AI 助手：商品页也要能问（"这个 200 贵吗"），不用切回首页 -->
+<link rel="stylesheet" th:href="@{/css/agent-widget.css}">
+<div th:replace="~{fragments/agent-widget :: widget}"></div>
+<script th:src="@{/js/agent-widget.js}"></script>
+
+</body>
+</html>

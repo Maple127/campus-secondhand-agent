@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户售卖商品</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f5f5; }
+        .header { background-color: #333; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .header a { color: white; text-decoration: none; margin-left: 20px; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .product-card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; }
+        .product-card img { width: 100%; height: 160px; object-fit: cover; }
+        .product-body { padding: 15px; }
+        .product-body h4 { margin: 0 0 8px; font-size: 16px; }
+        .product-body p { margin: 5px 0; color: #666; font-size: 13px; }
+        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; color: white; }
+        .status-0 { background: #f39c12; } /* 待审核 -> 显示为“已下架”或“待审核” */
+        .status-1 { background: #27ae60; } /* 审核通过 -> 在售 */
+        .status-2 { background: #e74c3c; } /* 拒绝 -> 已下架 */
+        .back-link { margin-bottom: 20px; display: inline-block; color: #3498db; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+<div class="header">
+    <h1>校园二手交易平台 - 管理后台</h1>
+    <div>
+        <span>欢迎, [[${admin.username}]]</span>
+        <a href="/admin/dashboard">首页</a>
+        <a href="/admin/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <a th:href="@{/admin/users}" class="back-link">← 返回用户列表</a>
+    <h2>用户 “<span th:text="${user.username}">用户名</span>” 的售卖商品</h2>
+
+    <div class="product-grid">
+        <div th:if="${products.isEmpty()}" style="grid-column:1/-1; text-align:center; padding:40px; color:#999;">
+            该用户暂无售卖商品
+        </div>
+
+        <div class="product-card" th:each="product : ${products}">
+            <img th:src="${product.image != null and !product.image.isEmpty()} ? ${product.image} : 'https://via.placeholder.com/300x200?text=暂无图片'" alt="商品图">
+            <div class="product-body">
+                <h4 th:text="${product.name}">商品名</h4>
+                <p th:text="${product.description != null ? product.description : '暂无描述'}">描述</p>
+                <p>
+                    状态：
+                    <span th:switch="${product.status}">
+                        <span th:case="0" class="status-badge status-0">待审核</span>
+                        <span th:case="1" class="status-badge status-1">在售</span>
+                        <span th:case="2" class="status-badge status-2">已下架</span>
+                        <span th:case="3" class="status-badge" style="background:#e67e22;">已售出</span>
+                        <span th:case="4" class="status-badge" style="background:#3498db;">配送中</span>
+                        <span th:case="5" class="status-badge" style="background:#95a5a6;">已删除</span>
+                        <!-- 未知状态兜底，显示原始数值 -->
+                    <span th:case="*" class="status-badge" style="background:#999;">
+                        未知(<span th:text="${product.status}"></span>)
+                    </span>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

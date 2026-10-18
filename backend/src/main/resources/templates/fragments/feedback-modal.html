@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>feedback-modal</title></head>
+<body>
+
+<!--
+  通用反馈弹窗（可复用片段）
+
+  用法：
+    <div th:replace="~{fragments/feedback-modal :: modal(
+            ${publishSubmitted}, '✅', '提交成功', '你的商品已提交审核…', '确认', '/home')}"></div>
+
+  参数：
+    show       是否显示（false 时整块隐藏，不占位）
+    icon       大图标 emoji
+    title      标题
+    message    正文
+    okText     按钮文字，通常「确认」
+    redirectTo 点确认后跳转的地址；传 '' 表示只关掉弹窗不跳转
+
+  为什么用弹窗而不是顶部横幅：
+    顶部的一条浅色提示太容易被忽略（尤其首页内容多、用户刚提交完就往下滚）。
+    弹窗是模态的，必须点「确认」才能继续，不会漏看。
+-->
+<div th:fragment="modal(show, icon, title, message, okText, redirectTo)"
+     class="fb-mask" id="fbMask" th:classappend="${show} ? '' : 'fb-hidden'">
+    <div class="fb-card">
+        <div class="fb-icon" th:text="${icon}">✅</div>
+        <div class="fb-title" th:text="${title}">提示</div>
+        <div class="fb-msg" th:text="${message}">内容</div>
+        <button type="button" class="fb-ok" th:text="${okText}"
+                th:attr="data-redirect=${redirectTo}"
+                onclick="fbConfirm(this)">确认</button>
+    </div>
+
+    <style>
+        .fb-mask {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            background: rgba(20, 24, 40, .45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fb-fade .16s ease-out;
+        }
+        .fb-mask.fb-hidden { display: none; }
+
+        @keyframes fb-fade { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes fb-pop {
+            from { opacity: 0; transform: translateY(12px) scale(.96) }
+            to   { opacity: 1; transform: none }
+        }
+
+        .fb-card {
+            width: 100%;
+            max-width: 330px;
+            background: #fff;
+            border-radius: 18px;
+            padding: 26px 22px 20px;
+            text-align: center;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
+            animation: fb-pop .2s ease-out;
+            font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+        }
+
+        .fb-icon { font-size: 42px; line-height: 1; margin-bottom: 12px; }
+
+        .fb-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 9px;
+        }
+
+        .fb-msg {
+            font-size: 13.5px;
+            line-height: 1.75;
+            color: #666;
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+
+        .fb-ok {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .fb-ok:active { transform: scale(.985); }
+    </style>
+
+    <script>
+        /* 点「确认」：有跳转地址就跳，没有就关掉弹窗 */
+        function fbConfirm(btn) {
+            var to = btn.dataset.redirect || '';
+            var mask = document.getElementById('fbMask');
+            if (to) {
+                window.location.href = to;
+            } else if (mask) {
+                mask.classList.add('fb-hidden');
+            }
+        }
+    </script>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>negotiation-panel</title></head>
+<body>
+
+<!--
+  议价面板（商品详情页）
+
+  设计要点：
+    · 默认收起，点开才请求 —— 不是每个访客都想砍价，别让所有人等一次请求
+    · 所有金额都是后端算的，这里只负责显示
+    · 价格合理时**劝你别砍** —— 一个只会教你压价的助手会把成交率做低
+-->
+<div th:fragment="panel" id="negoPanel" class="nego-panel" hidden>
+    <button type="button" class="nego-head" id="negoToggle">
+        <span class="nego-title">💰 这个价值不值？</span>
+        <span class="nego-hint" id="negoHint">点开看看该出多少</span>
+    </button>
+
+    <div class="nego-body" id="negoBody" hidden>
+        <div class="nego-verdict" id="negoVerdict"></div>
+
+        <div class="nego-prices" id="negoPrices">
+            <div class="nego-price">
+                <div class="nego-label">试探价</div>
+                <div class="nego-value open" id="negoOpen">—</div>
+            </div>
+            <div class="nego-price">
+                <div class="nego-label">目标价</div>
+                <div class="nego-value target" id="negoTarget">—</div>
+            </div>
+            <div class="nego-price">
+                <div class="nego-label">止损价</div>
+                <div class="nego-value walk" id="negoWalk">—</div>
+            </div>
+        </div>
+
+        <div class="nego-reason" id="negoReason"></div>
+
+        <div class="nego-script-wrap">
+            <div class="nego-script" id="negoScript"></div>
+            <button type="button" class="nego-copy" id="negoCopy">复制</button>
+        </div>
+
+        <div class="nego-tip" id="negoTip"></div>
+    </div>
+</div>
+
+</body>
+</html>

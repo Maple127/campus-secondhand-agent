@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>admin-backbar</title></head>
+<body>
+
+<!--
+  管理后台「返回控制台」条（可复用片段）
+
+  用法：紧跟在 <body> 之后
+    <div th:replace="~{admin/_backbar :: bar}"></div>
+
+  为什么用 sticky 而不是固定定位：
+    fixed 会盖住页面内容；sticky 只是吸附在顶部，内容整体下移一点点，
+    在任何屏幕宽度和页面结构下都不会遮挡。
+
+  背景：原来只有「举报工单」页有返回入口，其它模块进去后只能改地址栏
+  或者先点右上角"首页"文字链接才能回到控制台。
+-->
+<div th:fragment="bar" class="admin-backbar">
+    <a href="/admin/dashboard">⬅️ 返回控制台</a>
+
+    <style>
+        .admin-backbar {
+            position: sticky;
+            top: 0;
+            z-index: 500;
+            padding: 9px 18px;
+            background: #f5f6fa;
+            border-bottom: 1px solid #e3e6ef;
+            font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+        }
+        .admin-backbar a {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #d8dce8;
+            color: #4a5470;
+            font-size: 13.5px;
+            text-decoration: none;
+            transition: background .15s, color .15s, border-color .15s;
+        }
+        .admin-backbar a:hover {
+            background: #667eea;
+            border-color: #667eea;
+            color: #fff;
+        }
+    </style>
+</div>
+
+</body>
+</html>

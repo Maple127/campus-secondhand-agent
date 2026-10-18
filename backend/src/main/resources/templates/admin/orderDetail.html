@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单详情</title>
+    <style>
+        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f5; margin: 0; }
+        .navbar { background: #333; color: white; padding: 12px 20px; }
+        .navbar a { color: white; text-decoration: none; margin-right: 15px; font-size: 14px; }
+        .container { max-width: 600px; margin: 30px auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .row { margin-bottom: 15px; }
+        .label { font-weight: bold; color: #555; }
+        .value { color: #333; }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+<div class="navbar">
+    <a th:href="@{/admin/orders}">← 返回订单列表</a>
+    <span>订单详情</span>
+</div>
+
+<div class="container">
+    <h3>订单信息</h3>
+    <div class="row"><span class="label">订单编号：</span><span class="value" th:text="${order.orderNo}"></span></div>
+    <div class="row"><span class="label">买家：</span><span class="value" th:text="${buyerName}"></span></div>
+    <div class="row"><span class="label">商品：</span><span class="value" th:text="${productName}"></span></div>
+    <div class="row"><span class="label">卖家：</span><span class="value" th:text="${sellerName}"></span></div>
+    <div class="row"><span class="label">金额：</span><span class="value" th:text="'¥' + ${order.price}"></span></div>
+    <div class="row"><span class="label">配送方式：</span>
+        <span class="value">
+        <span th:if="${order.deliveryType == 'delivery'}">配送</span>
+        <span th:if="${order.deliveryType == 'pickup'}">自提</span>
+        <span th:if="${order.deliveryType == null or order.deliveryType.isEmpty()}">未选择</span>
+            <!-- 其他情况兜底 -->
+        <span th:unless="${order.deliveryType == 'delivery' or order.deliveryType == 'pickup'}" th:text="${order.deliveryType}"></span>
+    </span>
+    </div>
+    <div class="row"><span class="label">状态：</span>
+        <span class="value">
+        <span th:if="${order.status == 'unpaid'}">未付款</span>
+        <span th:if="${order.status == 'paid'}">已付款</span>
+        <span th:if="${order.status == 'shipping'}">配送中</span>
+        <span th:if="${order.status == 'completed' or order.status == 'sold'}">已售出</span>
+        <span th:if="${order.status == 'cancelled'}">已取消</span>
+        <span th:if="${order.status == null or order.status.isEmpty()}">未知</span>
+            <!-- 如果都不匹配，显示原值 -->
+        <span th:unless="${order.status == 'unpaid' or order.status == 'paid' or order.status == 'shipping' or order.status == 'completed' or order.status == 'sold' or order.status == 'cancelled'}" th:text="${order.status}"></span>
+    </span>
+    </div>
+    <div class="row"><span class="label">预约时间：</span><span class="value" th:text="${order.appointmentTime}"></span></div>
+    <div class="row"><span class="label">支付时间：</span><span class="value" th:text="${order.payTime}"></span></div>
+    <div class="row"><span class="label">创建时间：</span><span class="value" th:text="${order.createTime}"></span></div>
+</div>
+</body>
+</html>

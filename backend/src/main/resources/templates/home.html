@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>校园二手交易</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .auth a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 12px;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .auth a.login {
+            background: #fff;
+            color: #667eea;
+            border: none;
+            font-weight: 600;
+        }
+
+        .welcome span {
+            font-weight: bold;
+        }
+
+        .welcome a {
+            color: #ffd;
+            margin-left: 10px;
+            font-size: 13px;
+        }
+
+        .search-bar {
+            margin: 15px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-bar input.search-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            border: none;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-btn {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* ---------- 价格区间 + 排序 ---------- */
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 9px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .filter-dash {
+            color: #bbb;
+            font-size: 12px;
+        }
+
+        .price-input {
+            width: 68px;
+            padding: 7px 9px;
+            border-radius: 9px;
+            border: 1px solid #e3e3e3;
+            font-size: 13px;
+            background: #fff;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .sort-select {
+            padding: 7px 8px;
+            border-radius: 9px;
+            border: 1px solid #e3e3e3;
+            font-size: 13px;
+            background: #fff;
+            color: #444;
+        }
+
+        .filter-apply {
+            padding: 7px 14px;
+            border-radius: 9px;
+            border: none;
+            background: #667eea;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .filter-apply:hover { background: #5568d3; }
+
+        .filter-clear {
+            font-size: 12px;
+            color: #999;
+            text-decoration: none;
+            margin-left: 2px;
+        }
+
+        .filter-clear:hover { color: #667eea; }
+
+        .price-badge {
+            color: #667eea;
+            font-size: 13px;
+        }
+
+        .count-badge {
+            color: #999;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        /* ---------- 空状态卡片 ---------- */
+        .empty-state {
+            padding: 12px 15px 18px;
+        }
+
+        .empty-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .empty-msg {
+            font-size: 13.5px;
+            line-height: 1.75;
+            color: #888;
+            margin-bottom: 18px;
+        }
+
+        .empty-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .empty-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 22px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .empty-btn.ghost {
+            border: 1px solid #ddd;
+            color: #666;
+            background: #fff;
+        }
+
+        .empty-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .tags {
+            padding: 0 15px 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tags span {
+            background: #fff;
+            color: #667eea;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 15px 20px;/* 原来是 0 15px 100px，改成 20px */
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .card img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 10px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            height: 36px;
+            overflow: hidden;
+        }
+
+        .price {
+            color: #ff5000;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .meta {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .publish-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 80px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            text-decoration: none;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+        }
+
+        footer .active {
+            color: #667eea;
+        }
+
+        /*添加内容*/
+        .tag-link {
+            background: #fff;
+            color: #667eea;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tag-link.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.4);
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 15px 110px;
+        }
+        .page-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #fff;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 13px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        .page-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            color: #333;
+            text-decoration: none;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        .page-num.current {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- 顶部栏 -->
+<header>
+    <h1>🎓 校园二手交易</h1>
+
+    <!-- 未登录 -->
+    <div class="auth" th:if="${loginUser == null}">
+        <a th:href="@{/register}">注册</a>
+        <a class="login" th:href="@{/login}">登录</a>
+    </div>
+
+    <!-- 已登录 -->
+    <div class="welcome" th:if="${loginUser != null}">
+        你好，<span th:text="${loginUser}">同学</span>
+        <a th:href="@{/logout}">退出</a>
+    </div>
+</header>
+<!-- 注册成功提示（普通横幅即可，这个不涉及破坏性操作） -->
+<div th:if="${registerSuccess}"
+     style="
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 12px 20px;
+        text-align: center;
+        font-size: 14px;
+        border-bottom: 1px solid #c8e6c9;
+     "
+     th:text="${registerSuccess}">
+</div>
+
+<!-- 发布成功 → 弹窗确认（原来顶部一条浅色文字太容易被忽略） -->
+<div th:replace="~{fragments/feedback-modal :: modal(
+        ${publishSubmitted}, '📮', '已提交审核',
+        ${publishSubmittedMsg}, '确认', '')}"></div>
+
+<!-- 搜索 + 筛选 -->
+<form class="search-bar" th:action="@{/home}" method="get">
+    <div class="search-row">
+        <input name="keyword" th:value="${keyword}" placeholder="搜教材 / 电脑 / 自行车…" class="search-input">
+        <button type="submit" class="search-btn">🔍 搜索</button>
+    </div>
+
+    <!-- 价格区间与排序：把「300 到 800」这类需求交给搜索框，
+         不必再绕道 AI 助手（评测显示纯检索场景搜索框更快更省） -->
+    <div class="filter-row">
+        <span class="filter-label">价格</span>
+        <input name="minPrice" type="number" min="0" step="1" placeholder="最低"
+               th:value="${minPrice}" class="price-input">
+        <span class="filter-dash">—</span>
+        <input name="maxPrice" type="number" min="0" step="1" placeholder="最高"
+               th:value="${maxPrice}" class="price-input">
+
+        <span class="filter-label" style="margin-left:6px;">排序</span>
+        <select name="sortBy" class="sort-select">
+            <option value="createTime" th:selected="${sortBy == null or sortBy == 'createTime'}">最新发布</option>
+            <option value="price-asc"  th:selected="${sortBy == 'price-asc'}">价格从低到高</option>
+            <option value="price-desc" th:selected="${sortBy == 'price-desc'}">价格从高到低</option>
+        </select>
+
+        <!-- 保留当前分类，切换筛选时不丢上下文 -->
+        <input type="hidden" name="category" th:value="${category}">
+
+        <button type="submit" class="filter-apply">筛选</button>
+        <a th:if="${(minPrice != null) or (maxPrice != null)}"
+           th:href="@{/home(keyword=${keyword}, category=${category})}"
+           class="filter-clear">清除价格</a>
+    </div>
+</form>
+
+<!-- 分类 -->
+<a th:href="@{/home(keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}" class="tag-link" th:classappend="${category == null or category.isEmpty()} ? ' active' : ''">📋 全部</a>
+<a th:href="@{/home(category='图书教材', keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}" class="tag-link" th:classappend="${category == '图书教材'} ? ' active' : ''">📚 图书教材</a>
+<a th:href="@{/home(category='数码电子', keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}" class="tag-link" th:classappend="${category == '数码电子'} ? ' active' : ''">💻 数码电子</a>
+<a th:href="@{/home(category='生活用品', keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}" class="tag-link" th:classappend="${category == '生活用品'} ? ' active' : ''">🛏️ 生活用品</a>
+<a th:href="@{/home(category='体育器材', keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}" class="tag-link" th:classappend="${category == '体育器材'} ? ' active' : ''">🚲 体育器材</a>
+<a th:href="@{/home(category='其他', keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}" class="tag-link" th:classappend="${category == '其他'} ? ' active' : ''">📦 其他</a>
+
+<!-- 商品 -->
+<div class="section-title">
+    <span th:if="${category != null and !category.isEmpty()}" th:text="'📂 ' + ${category}"></span>
+    <span th:if="${(category == null or category.isEmpty()) and (keyword != null and !keyword.isEmpty())}" th:text="'🔍 “' + ${keyword} + '” 的搜索结果'"></span>
+    <span th:if="${(category == null or category.isEmpty()) and (keyword == null or keyword.isEmpty())}">🔥 附近同学在卖</span>
+    <span th:if="${(minPrice != null) or (maxPrice != null)}"
+          class="price-badge"
+          th:text="'　¥' + (${minPrice != null} ? ${minPrice} : '0') + ' ~ ' + (${maxPrice != null} ? ${maxPrice} : '不限')"></span>
+    <span th:if="${totalElements != null}" class="count-badge" th:text="'共 ' + ${totalElements} + ' 件'"></span>
+</div>
+
+<!-- 空状态：把"搜不到"从死路变成入口 -->
+<div th:if="${products == null or products.isEmpty()}" class="empty-state">
+
+    <!-- ① 有关键词：分"缺货"和"缺词"两种说法 -->
+    <div th:if="${keyword != null and !keyword.isEmpty()}" class="empty-card">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title" th:text="'没有找到「' + ${keyword} + '」'"></div>
+
+        <!-- 词表认识这个品类，但平台没货 -->
+        <div th:if="${emptyHint == 'TYPE_EMPTY'}" class="empty-msg">
+            平台上还没有人挂这个品类。<br>
+            你可以换个说法试试，或者发布一件让买家找到你。
+        </div>
+        <!-- 词表不认识这个说法 -->
+        <div th:if="${emptyHint == 'NO_TYPE' or emptyHint == null}" class="empty-msg">
+            可能是叫法不一样。<br>
+            试试更通用的词，或者直接发布你的闲置。
+        </div>
+
+        <div class="empty-actions">
+            <a th:href="@{/home}" class="empty-btn ghost">🗂️ 看看全部商品</a>
+            <a th:href="@{/publish}" class="empty-btn primary">＋ 发布闲置</a>
+        </div>
+    </div>
+
+    <!-- ② 只有价格筛选把它筛没了 -->
+    <div th:if="${(keyword == null or keyword.isEmpty()) and ((minPrice != null) or (maxPrice != null))}"
+         class="empty-card">
+        <div class="empty-icon">💰</div>
+        <div class="empty-title">这个价格区间没有商品</div>
+        <div class="empty-msg">放宽价格条件试试，或者看看其它分类。</div>
+        <div class="empty-actions">
+            <a th:href="@{/home(keyword=${keyword}, category=${category})}" class="empty-btn ghost">
+                清除价格条件
+            </a>
+        </div>
+    </div>
+
+    <!-- ③ 全站空 -->
+    <div th:if="${(keyword == null or keyword.isEmpty()) and (minPrice == null) and (maxPrice == null)}"
+         class="empty-card">
+        <div class="empty-icon">📦</div>
+        <div class="empty-title">这里还空着</div>
+        <div class="empty-msg">点击右下角「＋」发布你的第一件闲置吧～</div>
+    </div>
+</div>
+
+<!-- 零结果时的替代推荐：让用户在失败之后还能看到点东西 -->
+<div th:if="${suggestions != null and !#lists.isEmpty(suggestions)}">
+    <div class="section-title" style="margin-top:6px;">
+        <span>💡 这些可能也符合</span>
+    </div>
+    <div class="product-grid">
+        <a th:each="p : ${suggestions}"
+           th:href="@{'/product/' + ${p.id}}"
+           class="card" style="text-decoration:none; color:inherit;">
+            <img th:src="${p.image != null and !p.image.isEmpty()} ? ${p.image} : 'https://via.placeholder.com/300x200?text=暂无图片'">
+            <div class="card-body">
+                <div class="card-title" th:text="${p.name}">商品名称</div>
+                <div class="price" th:text="'¥' + (${p.price != null} ? ${p.price} : '0')">¥0</div>
+                <div class="meta" th:text="${p.location != null and !p.location.isEmpty()} ? ${p.location} : '校园内'">地点</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="product-grid">
+    <a th:each="p : ${products}"
+       th:href="@{'/product/' + ${p.id}}"
+       class="card" style="text-decoration:none; color:inherit;">
+        <img th:src="${p.image != null and !p.image.isEmpty()} ? ${p.image} : 'https://via.placeholder.com/300x200?text=暂无图片'">
+        <div class="card-body">
+            <div class="card-title" th:text="${p.name}">商品名称</div>
+            <div class="price" th:text="'¥' + (${p.price != null} ? ${p.price} : '0')">¥0</div>
+            <div class="meta" th:text="${p.location != null and !p.location.isEmpty()} ? ${p.location} : '校园内'">地点</div>
+        </div>
+    </a>
+</div>
+
+<!-- 分页导航（保留全部筛选条件，否则翻页会丢筛选） -->
+<div th:if="${totalPages > 1}" class="pagination">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/home(page=${currentPage - 1}, keyword=${keyword}, category=${category}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}"
+       class="page-btn">上一页</a>
+    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+        <a th:href="@{/home(page=${i}, keyword=${keyword}, category=${category}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}"
+           th:text="${i + 1}"
+           th:classappend="${i == currentPage} ? ' current' : ''"
+           class="page-num">1</a>
+    </span>
+    <a th:if="${currentPage < totalPages - 1}"
+       th:href="@{/home(page=${currentPage + 1}, keyword=${keyword}, category=${category}, minPrice=${minPrice}, maxPrice=${maxPrice}, sortBy=${sortBy})}"
+       class="page-btn">下一页</a>
+</div>
+
+<!-- 发布按钮 -->
+<a th:href="@{/publish}" class="publish-btn">＋</a>
+
+<!-- 底部 -->
+<footer>
+    <div class="active">🏠 首页</div>
+    <a th:href="@{/publish}" style="color:#666; text-decoration:none;">
+        <div>📦 发布</div>
+    </a>
+    <!-- 原来这里是「收藏」，但收藏是低频动作，订单是高频入口。
+         收藏移到「我的 → 我的收藏」。 -->
+    <a th:href="@{/order/list}" style="color:#666; text-decoration:none;">
+        <div>📋 订单</div>
+    </a>
+    <a href="/my" style="color: #666; text-decoration: none;">
+        <div>👤 我的</div>
+    </a>
+</footer>
+
+<!-- AI 助手（仅登录后显示） -->
+<link rel="stylesheet" th:href="@{/css/agent-widget.css}">
+<div th:replace="~{fragments/agent-widget :: widget}"></div>
+<script th:src="@{/js/agent-widget.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>举报工单处理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        /* 与其它管理模块完全一致的黑色抬头 */
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .status-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-tabs a {
+            padding: 8px 20px;
+            background-color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-tabs a.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .status-approved {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            color: #e74c3c;
+        }
+
+        .reason {
+            color: #d9534f;
+            font-weight: bold;
+        }
+
+        .admin-reply {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .actions form {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .actions input[type="text"] {
+            width: 110px;
+            padding: 5px 8px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-approve {
+            background-color: #27ae60;
+        }
+
+        .btn-reject {
+            background-color: #e74c3c;
+        }
+
+        .success {
+            color: #27ae60;
+            padding: 15px;
+            background-color: #d4edda;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            color: #e74c3c;
+            padding: 15px;
+            background-color: #f8d7da;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .empty {
+            text-align: center;
+            color: #888;
+            padding: 30px 0;
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+
+<div class="header">
+    <h1>校园二手交易平台 - 管理后台</h1>
+    <div>
+        <span>欢迎, [[${admin.username}]]</span>
+        <a href="/admin/dashboard">首页</a>
+        <a href="/admin/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div th:if="${success}" class="success">[[${success}]]</div>
+    <div th:if="${error}" class="error">[[${error}]]</div>
+
+    <h2>举报工单处理</h2>
+
+    <!-- 与「商品审核管理」同样的 tab 样式；-1 表示全部 -->
+    <div class="status-tabs">
+        <a th:class="${status == -1 ? 'active' : ''}" href="/admin/reports">全部工单</a>
+        <a th:class="${status == 0 ? 'active' : ''}" href="/admin/reports?status=0">待处理</a>
+        <a th:class="${status == 1 ? 'active' : ''}" href="/admin/reports?status=1">已核实下架</a>
+        <a th:class="${status == 2 ? 'active' : ''}" href="/admin/reports?status=2">已驳回</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>工单ID</th>
+            <th>举报人</th>
+            <th>被举报商品</th>
+            <th>违规分类</th>
+            <th>说明证据</th>
+            <th>提交时间</th>
+            <th>当前状态</th>
+            <th>管理操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(reports)}">
+            <td colspan="8" class="empty">暂无相关举报工单</td>
+        </tr>
+        <tr th:each="r : ${reports}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.username} + ' (ID:' + ${r.userId} + ')'">user01</td>
+            <td>
+                <a th:href="@{'/product/' + ${r.productId}}" target="_blank"
+                   th:text="${r.productName}">商品名</a>
+            </td>
+            <td class="reason" th:text="${r.reasonType}">虚假商品</td>
+            <td th:text="${r.description}">证据...</td>
+            <td th:text="${#temporals.format(r.createTime, 'yyyy-MM-dd HH:mm')}">时间</td>
+            <td>
+                <span th:if="${r.status == 0}" class="status-pending">待处理</span>
+                <span th:if="${r.status == 1}" class="status-approved">已下架</span>
+                <span th:if="${r.status == 2}" class="status-rejected">已驳回</span>
+                <div th:if="${r.adminReply != null}" class="admin-reply"
+                     th:text="'批注：' + ${r.adminReply}"></div>
+            </td>
+            <td class="actions">
+                <form th:if="${r.status == 0}"
+                      th:action="@{'/admin/report/' + ${r.id} + '/handle'}" method="post">
+                    <input type="text" name="adminReply" placeholder="批复意见(可选)">
+                    <button type="submit" name="status" value="1"
+                            class="btn btn-approve" title="确认违规并下架商品">已核实(下架)</button>
+                    <button type="submit" name="status" value="2"
+                            class="btn btn-reject" title="证据不足驳回">驳回</button>
+                </form>
+                <span th:if="${r.status != 0}" style="color:#aaa; font-size:12px;">操作已完成</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

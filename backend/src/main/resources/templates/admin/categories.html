@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品分类管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .add-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .actions a {
+            margin-right: 10px;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .actions .edit { background-color: #3498db; color: white; }
+        .actions .delete { background-color: #e74c3c; color: white; }
+        .success {
+            color: #27ae60;
+            padding: 15px;
+            background-color: #d4edda;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+    <div class="header">
+        <h1>校园二手交易平台 - 管理后台</h1>
+        <div>
+            <span>欢迎, [[${admin.username}]]</span>
+            <a href="/admin/dashboard">首页</a>
+            <a href="/admin/logout">退出登录</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div th:if="${success}" class="success">[[${success}]]</div>
+        
+        <h2>商品分类管理</h2>
+        
+        <a href="/admin/category/add" class="add-link">+ 添加分类</a>
+        
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>分类名称</th>
+                <th>描述</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            <tr th:each="category : ${categories}">
+                <td th:text="${category.id}"></td>
+                <td th:text="${category.name}"></td>
+                <td th:text="${category.description != null ? category.description : '暂无'}"></td>
+                <td th:text="${category.createTime}"></td>
+                <td class="actions">
+                    <a th:href="@{'/admin/category/' + ${category.id} + '/edit'}" class="edit">编辑</a>
+                    <a th:href="@{'/admin/category/' + ${category.id} + '/delete'}" onclick="return confirm('确定删除此分类？')" class="delete">删除</a>
+                </td>
+            </tr>
+        </table>
+        
+        <div th:if="${categories.size() == 0}" style="text-align:center; padding:40px; color:#999;">
+            暂无分类
+        </div>
+    </div>
+</body>
+</html>

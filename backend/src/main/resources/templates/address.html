@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>收货地址 - 校园二手交易</title>
+    <style>
+        * { box-sizing:border-box; font-family:"PingFang SC","Microsoft YaHei"; }
+        body { background:#f5f6f8; margin:0; }
+
+        .back-arrow {
+            position:fixed; top:20px; left:20px;
+            width:44px; height:44px; background:#fff;
+            border-radius:50%; display:flex;
+            align-items:center; justify-content:center;
+            font-size:20px; color:#667eea;
+            text-decoration:none; box-shadow:0 2px 10px rgba(0,0,0,.1);
+            z-index:999;
+        }
+
+        .page-title {
+            text-align:center; padding:40px 20px 10px;
+            font-size:22px; font-weight:600; color:#333;
+        }
+
+        .addr-card {
+            max-width:600px; margin:30px auto;
+            background:linear-gradient(135deg,#ffecd2,#fcb69f);
+            border-radius:20px; padding:50px 40px;
+            text-align:center; color:#333;
+            box-shadow:0 8px 30px rgba(0,0,0,.08);
+        }
+
+        .addr-icon { font-size:64px; margin-bottom:20px; }
+        .addr-label { font-size:14px; color:#666; margin-bottom:8px; }
+        .addr-value { font-size:22px; font-weight:700; }
+
+        .empty {
+            text-align:center; padding:80px 20px; color:#999;
+        }
+
+        .mask {
+            position:fixed; inset:0;
+            background:rgba(0,0,0,.5);
+            display:flex; align-items:center; justify-content:center;
+            z-index:9999;
+        }
+
+        .mask-box { background:#fff; padding:30px; border-radius:12px; text-align:center; }
+        .mask-box a { color:#667eea; font-weight:600; }
+    </style>
+</head>
+<body>
+
+<a href="/my" class="back-arrow">⬅️</a>
+
+<div class="mask" th:if="${user == null}">
+    <div class="mask-box">
+        <h3>请先登录</h3>
+        <p><a href="/login">去登录</a></p>
+    </div>
+</div>
+
+<div th:if="${user != null}">
+
+    <div class="page-title">收货地址</div>
+
+    <!-- 有地址 -->
+    <div class="addr-card" th:if="${user.shippingAddress != null}">
+        <div class="addr-icon">📍</div>
+        <div class="addr-label">默认收货地址</div>
+        <div class="addr-value" th:text="${user.shippingAddress}">
+            北京市海淀区颐和园路5号
+        </div>
+    </div>
+
+    <!-- 没地址 -->
+    <div class="empty" th:unless="${user.shippingAddress != null}">
+        <p style="font-size:48px;">📭</p>
+        <p>暂无收货地址</p>
+        <p style="margin-top:10px; font-size:13px; color:#bbb;">
+            系统将在您首次登录时自动分配
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>价格参考组件片段</title>
+</head>
+<body>
+
+<!--
+  价格参考组件（可复用片段）
+
+  用法：
+      <div th:replace="~{fragments/price-insight :: panel}"></div>
+      <script th:src="@{/js/price-insight.js}"></script>
+      <script>PriceInsight.init({ scope: 'product', productId: 12 });</script>
+
+  设计要点：
+    - **纯后端统计**，不经过任何 LLM。这是把比价能力从 agent 里"拿出来"的结果：
+      同样的 p25/中位/p75，现在商品页和发布页都能直接用。
+    - 数据异步加载（页面渲染不被统计查询阻塞），失败时整块隐藏而不是显示报错。
+    - 样本不足时如实说"样本太少"，不编造区间。
+-->
+<div th:fragment="panel" id="priceInsight" class="pi-panel" hidden>
+    <div class="pi-head">
+        <span class="pi-title">💰 价格参考</span>
+        <span class="pi-verdict" id="piVerdict"></span>
+    </div>
+
+    <!-- 价格区间条：低 --- 中位 --- 高 -->
+    <div class="pi-bar-wrap">
+        <div class="pi-bar">
+            <div class="pi-bar-range" id="piBarRange"></div>
+            <div class="pi-bar-median" id="piBarMedian"></div>
+        </div>
+        <div class="pi-scale">
+            <span id="piMin">—</span>
+            <span class="pi-scale-mid" id="piMedian">—</span>
+            <span id="piMax">—</span>
+        </div>
+    </div>
+
+    <div class="pi-facts">
+        <div class="pi-fact">
+            <div class="pi-fact-label">常见区间</div>
+            <div class="pi-fact-value" id="piRange">—</div>
+        </div>
+        <div class="pi-fact">
+            <div class="pi-fact-label">中位价</div>
+            <div class="pi-fact-value" id="piMedianVal">—</div>
+        </div>
+        <div class="pi-fact">
+            <div class="pi-fact-label">样本数</div>
+            <div class="pi-fact-value" id="piSamples">—</div>
+        </div>
+    </div>
+
+    <div class="pi-explain" id="piExplain"></div>
+    <div class="pi-samples" id="piSamples-list"></div>
+</div>
+
+</body>
+</html>

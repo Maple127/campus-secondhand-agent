@@ -1,0 +1,321 @@
+/* ============================================================
+   AI 助手悬浮抽屉样式
+   作用域限制在 #agentWidget 内，避免污染既有页面样式
+   ============================================================ */
+
+#agentWidget {
+    --agent-primary: #667eea;
+    --agent-primary-dark: #5568d3;
+    font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+}
+
+/* ---------- 悬浮按钮（左下角） ---------- */
+#agentFab {
+    position: fixed;
+    /* 放在左下角，与右下角的「＋」发布按钮左右对称。
+       bottom: 80px 是避开底部导航栏（固定在 bottom:0，高约 50px）。 */
+    left: 22px;
+    right: auto;
+    bottom: 80px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 17px;
+    border: none;
+    border-radius: 99px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, .42);
+    transition: transform .18s, box-shadow .18s;
+}
+
+#agentFab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(102, 126, 234, .5);
+}
+
+#agentFab.hidden { display: none; }
+
+.agent-fab-icon { font-size: 17px; line-height: 1; }
+
+/* ---------- 抽屉 ---------- */
+/* 抽屉跟随按钮一起放在左下角：按钮在左下、面板却从右下弹出会让人找不到对应关系 */
+.agent-panel {
+    position: fixed;
+    left: 22px;
+    right: auto;
+    bottom: 22px;
+    z-index: 901;
+    width: 380px;
+    max-width: calc(100vw - 44px);
+    height: 560px;
+    max-height: calc(100vh - 120px);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, .18);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(14px) scale(.98);
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+}
+
+.agent-panel.open {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+.agent-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+}
+
+.agent-head strong { font-size: 15px; display: block; }
+.agent-head small { font-size: 11.5px; opacity: .88; }
+
+.agent-head-actions { display: flex; gap: 6px; }
+
+.agent-head-actions button {
+    border: 1px solid rgba(255, 255, 255, .55);
+    background: transparent;
+    color: #fff;
+    font-size: 12px;
+    font-family: inherit;
+    padding: 4px 9px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.agent-head-actions button:hover { background: rgba(255, 255, 255, .18); }
+
+/* ---------- 消息区 ---------- */
+.agent-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    background: #f7f8fc;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.agent-hint {
+    font-size: 12.5px;
+    color: #6b7280;
+    background: #eef1f8;
+    border-radius: 10px;
+    padding: 10px 12px;
+    line-height: 1.8;
+}
+
+.agent-msg {
+    max-width: 84%;
+    padding: 9px 13px;
+    border-radius: 13px;
+    font-size: 13.5px;
+    line-height: 1.66;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.agent-msg.user {
+    align-self: flex-end;
+    background: var(--agent-primary);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.agent-msg.assistant {
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid #e6e8f0;
+    border-bottom-left-radius: 4px;
+    color: #1f2937;
+}
+
+.agent-msg.error {
+    align-self: flex-start;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
+}
+
+.agent-msg.system {
+    align-self: center;
+    background: #e5e7eb;
+    color: #4b5563;
+    font-size: 11.5px;
+    padding: 4px 11px;
+    border-radius: 99px;
+}
+
+/* ---------- 工具调用提示 ---------- */
+.agent-tool {
+    align-self: flex-start;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 11.5px;
+    color: #0f766e;
+    background: #f0fdfa;
+    border: 1px dashed #99f6e4;
+    border-radius: 9px;
+    padding: 6px 11px;
+    max-width: 90%;
+}
+
+.agent-tool.done { color: #475569; border-color: #cbd5e1; background: #f8fafc; }
+
+.agent-tool .args {
+    color: #64748b;
+    display: block;
+    margin-top: 3px;
+    word-break: break-all;
+}
+
+/* ---------- 人工确认卡片 ---------- */
+.agent-confirm {
+    align-self: stretch;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 12px;
+    padding: 12px 13px;
+    max-width: 96%;
+}
+
+.agent-confirm-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 9px;
+}
+
+.agent-confirm-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 9px;
+}
+
+.agent-confirm-row {
+    display: flex;
+    gap: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.agent-confirm-row .k {
+    flex: 0 0 66px;
+    color: #a16207;
+}
+
+.agent-confirm-row .v {
+    flex: 1;
+    color: #1f2937;
+    word-break: break-word;
+}
+
+.agent-confirm-notice {
+    font-size: 12px;
+    color: #92722a;
+    background: #fef9e7;
+    border-radius: 7px;
+    padding: 7px 9px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.agent-confirm-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.agent-confirm-actions button {
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 0;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.agent-confirm-actions button.ok { background: #16a34a; color: #fff; }
+.agent-confirm-actions button.ok:hover { background: #15803d; }
+.agent-confirm-actions button.no { background: #e5e7eb; color: #374151; }
+.agent-confirm-actions button.no:hover { background: #d1d5db; }
+.agent-confirm-actions button:disabled { opacity: .5; cursor: not-allowed; }
+
+.agent-confirm-stamp {
+    margin-top: 9px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.agent-confirm-stamp.ok { color: #16a34a; }
+.agent-confirm-stamp.no { color: #6b7280; }
+
+/* ---------- 输入区 ---------- */
+.agent-foot {
+    display: flex;
+    gap: 8px;
+    padding: 11px 13px;
+    border-top: 1px solid #e9ebf3;
+    background: #fff;
+}
+
+#agentInput {
+    flex: 1;
+    resize: none;
+    border: 1px solid #d8dbe8;
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-family: inherit;
+    font-size: 13.5px;
+    line-height: 1.5;
+    max-height: 96px;
+    outline: none;
+}
+
+#agentInput:focus {
+    border-color: var(--agent-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, .14);
+}
+
+#agentSend {
+    border: none;
+    background: var(--agent-primary);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 0 17px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#agentSend:hover { background: var(--agent-primary-dark); }
+#agentSend:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 打字光标 */
+.agent-caret::after {
+    content: '▋';
+    color: var(--agent-primary);
+    animation: agent-blink 1s steps(2) infinite;
+}
+
+@keyframes agent-blink { 50% { opacity: 0; } }
+
+@media (max-width: 480px) {
+    .agent-panel { left: 8px; right: 8px; width: auto; height: 74vh; }
+    /* 小屏同样放左下角，抬高一点避开底部导航栏 */
+    #agentFab { left: 14px; right: auto; bottom: 76px; }
+}

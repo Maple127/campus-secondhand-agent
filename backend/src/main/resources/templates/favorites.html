@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title} + ' - 校园二手交易'">我的收藏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing:border-box; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+        body { margin:0; background:#f5f5f5; }
+
+        header {
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff; padding:14px 20px;
+            display:flex; align-items:center; gap:12px;
+        }
+        header a { color:#fff; text-decoration:none; font-size:20px; }
+        header h1 { font-size:18px; margin:0; }
+
+        .product-grid {
+            display:grid; grid-template-columns:repeat(2,1fr);
+            gap:12px; padding:15px;
+        }
+        .card {
+            background:#fff; border-radius:12px; overflow:hidden;
+            box-shadow:0 2px 10px rgba(0,0,0,.08);
+        }
+        .card img { width:100%; height:130px; object-fit:cover; }
+        .card-body { padding:10px; }
+        .card-title { font-size:13px; height:36px; overflow:hidden; }
+        .price { color:#ff5000; font-weight:bold; margin-top:6px; }
+        .meta { font-size:12px; color:#999; margin-top:4px; }
+
+        .empty { text-align:center; color:#999; padding:60px 20px; font-size:14px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a th:href="@{/home}">⬅️</a>
+    <h1 th:text="${title}">我的收藏</h1>
+</header>
+
+<div th:if="${products == null or products.isEmpty()}" class="empty">
+    这里还什么都没有～
+</div>
+
+<div class="product-grid">
+    <a th:each="p : ${products}"
+       th:href="@{'/product/' + ${p.id}}"
+       class="card" style="text-decoration:none; color:inherit;">
+        <img th:src="${p.image != null and !p.image.isEmpty()} ? ${p.image} : 'https://via.placeholder.com/300x200?text=暂无图片'">
+        <div class="card-body">
+            <div class="card-title" th:text="${p.name}">商品名称</div>
+            <div class="price" th:text="'¥' + (${p.price != null} ? ${p.price} : '0')">¥0</div>
+            <div class="meta" th:text="${p.location != null and !p.location.isEmpty()} ? ${p.location} : '校园内'">地点</div>
+        </div>
+    </a>
+</div>
+
+</body>
+</html>

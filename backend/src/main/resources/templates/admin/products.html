@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品审核管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .filter-bar {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-bar select,
+        .filter-bar input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .filter-bar button {
+            padding: 8px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .status-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-tabs a {
+            padding: 8px 20px;
+            background-color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-tabs a.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #f39c12;
+        }
+
+        .status-approved {
+            color: #27ae60;
+        }
+
+        .status-rejected {
+            color: #e74c3c;
+        }
+
+        .actions a {
+            margin-right: 10px;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .actions .detail {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .actions .approve {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .actions .reject {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .actions .delete {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .success {
+            color: #27ae60;
+            padding: 15px;
+            background-color: #d4edda;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+        }
+
+        .modal-content h3 {
+            margin: 0 0 20px 0;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .modal-content button {
+            margin-top: 15px;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-content .btn-reject {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .modal-content .btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+    <div class="header">
+        <h1>校园二手交易平台 - 管理后台</h1>
+        <div>
+            <span>欢迎, [[${admin.username}]]</span>
+            <a href="/admin/dashboard">首页</a>
+            <a href="/admin/logout">退出登录</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div th:if="${success}" class="success">[[${success}]]</div>
+
+        <h2>商品审核管理</h2>
+
+        <div class="status-tabs">
+            <a th:class="${status == 0 ? 'active' : ''}" href="/admin/products?status=0">待审核</a>
+            <a th:class="${status == 1 ? 'active' : ''}" href="/admin/products?status=1">已通过</a>
+            <a th:class="${status == 2 ? 'active' : ''}" href="/admin/products?status=2">已拒绝</a>
+        </div>
+
+        <div class="filter-bar">
+            <input type="text" name="keyword" placeholder="搜索商品名称" th:value="${keyword}">
+            <button onclick="search()">搜索</button>
+        </div>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>商品名称</th>
+                <th>卖家</th>
+                <th>分类</th>
+                <th>价格</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.id}"></td>
+                <td th:text="${product.name}"></td>
+                <td th:text="${product.sellerName}"></td>
+                <td th:text="${product.categoryName != null ? product.categoryName : '未分类'}"></td>
+                <td>¥<span th:text="${product.price}"></span></td>
+                <td>
+                    <span
+                        th:class="${product.status == 0 ? 'status-pending' : product.status == 1 ? 'status-approved' : 'status-rejected'}"
+                        th:text="${product.status == 0 ? '待审核' : product.status == 1 ? '已通过' : '已拒绝'}">
+                    </span>
+                </td>
+                <td th:text="${product.createTime}"></td>
+                <td class="actions">
+                    <a th:href="@{'/admin/product/' + ${product.id}}" class="detail">详情</a>
+                    <th:block th:if="${product.status == 0}">
+                        <a th:href="@{'/admin/product/' + ${product.id} + '/approve'}" class="approve">通过</a>
+                        <button class="reject" th:onclick="'showRejectModal(' + ${product.id} + ')'">拒绝</button>
+                    </th:block>
+                    <a th:href="@{'/admin/product/' + ${product.id} + '/delete'}" onclick="return confirm('确定删除此商品？')"
+                        class="delete">删除</a>
+                </td>
+            </tr>
+        </table>
+
+        <div th:if="${products.size() == 0}" style="text-align:center; padding:40px; color:#999;">
+            暂无商品
+        </div>
+    </div>
+
+    <div id="rejectModal" class="modal">
+        <div class="modal-content">
+            <h3>拒绝原因</h3>
+            <form id="rejectForm" method="post" enctype="application/x-www-form-urlencoded">
+                <textarea name="rejectReason" placeholder="请输入拒绝原因..." required></textarea>
+                <input type="submit" value="确认拒绝" class="btn-reject">
+                <input type="button" value="取消" class="btn-cancel" onclick="closeModal()">
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function search() {
+            const keyword = document.querySelector('input[name="keyword"]').value;
+            const status = [[${ status }]];
+            window.location.href = '/admin/products?status=' + status + '&keyword=' + keyword;
+        }
+
+        function showRejectModal(productId) {
+            document.getElementById('rejectForm').action = `/admin/product/${productId}/reject`;
+            document.getElementById('rejectModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('rejectModal').classList.remove('active');
+        }
+    </script>
+</body>
+
+</html>

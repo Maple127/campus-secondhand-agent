@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索日志</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 { margin: 0; font-size: 20px; }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tip {
+            background: #eef2ff;
+            border-left: 4px solid #667eea;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: #3f4a68;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        @media (max-width: 860px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .panel h3 {
+            margin: 0;
+            padding: 14px 18px;
+            font-size: 15px;
+            border-bottom: 1px solid #eee;
+            background: #fafbfc;
+        }
+
+        .panel h3 small {
+            font-weight: normal;
+            color: #999;
+            margin-left: 8px;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px 18px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13.5px;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .keyword {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .count {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .count.ok { color: #27ae60; }
+
+        .time { color: #999; font-size: 12.5px; }
+
+        .empty {
+            padding: 26px 18px;
+            text-align: center;
+            color: #999;
+            font-size: 13.5px;
+        }
+
+        .source-web { color: #3498db; }
+        .source-agent { color: #9b59b6; }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+
+<div class="header">
+    <h1>校园二手交易平台 - 管理后台</h1>
+    <div>
+        <span>欢迎, [[${admin.username}]]</span>
+        <a href="/admin/dashboard">首页</a>
+        <a href="/admin/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>搜索日志</h2>
+
+    <div class="tip">
+        这张表是<strong>品类词表的采购清单</strong>，也是<strong>缺货清单</strong>。两者处理方式完全不同：<br>
+        <strong>🔴 词表不认识的说法</strong> → 补一个别名就能修（一行 SQL）；<br>
+        <strong>🟠 平台没货的品类</strong> → 词表认识，但没人挂，这是供给问题（运营去引导卖家）。<br>
+        补词示例：<code>INSERT INTO product_type (category_id, name, aliases, sort_order) VALUES (...)</code>
+    </div>
+
+    <div class="grid">
+        <!-- 缺词：补一个别名就能修 -->
+        <div class="panel">
+            <h3>🔴 词表不认识的说法 <small id="noTypeCount">补别名就能修</small></h3>
+            <table th:if="${noTypeKeywords != null and !#lists.isEmpty(noTypeKeywords)}">
+                <thead>
+                <tr><th>关键词</th><th>被搜次数</th><th>最后一次</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${noTypeKeywords}">
+                    <td class="keyword" th:text="${r.keyword}">关键词</td>
+                    <td class="count" th:text="${r.count}">0</td>
+                    <td class="time"
+                        th:text="${r.lastTime != null} ? ${#temporals.format(r.lastTime, 'MM-dd HH:mm')} : ''"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${noTypeKeywords == null or #lists.isEmpty(noTypeKeywords)}">
+                没有这类记录 🎉
+            </div>
+        </div>
+
+        <!-- 缺货：词表认识，但没人挂 -->
+        <div class="panel">
+            <h3>🟠 平台没货的品类 <small>词表认识，但没人挂</small></h3>
+            <table th:if="${typeEmptyKeywords != null and !#lists.isEmpty(typeEmptyKeywords)}">
+                <thead>
+                <tr><th>关键词</th><th>被搜次数</th><th>最后一次</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${typeEmptyKeywords}">
+                    <td class="keyword" th:text="${r.keyword}">关键词</td>
+                    <td class="count" th:text="${r.count}">0</td>
+                    <td class="time"
+                        th:text="${r.lastTime != null} ? ${#temporals.format(r.lastTime, 'MM-dd HH:mm')} : ''"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${typeEmptyKeywords == null or #lists.isEmpty(typeEmptyKeywords)}">
+                没有这类记录 🎉
+            </div>
+        </div>
+
+        <!-- 少结果 -->
+        <div class="panel">
+            <h3>🟡 命中很少的关键词 <small>1~2 件，供给偏薄</small></h3>
+            <table th:if="${lowResults != null and !#lists.isEmpty(lowResults)}">
+                <thead>
+                <tr><th>关键词</th><th>被搜次数</th><th>最后一次</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${lowResults}">
+                    <td class="keyword" th:text="${r.keyword}">关键词</td>
+                    <td class="count" th:text="${r.count}">0</td>
+                    <td class="time"
+                        th:text="${r.lastTime != null} ? ${#temporals.format(r.lastTime, 'MM-dd HH:mm')} : ''"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${lowResults == null or #lists.isEmpty(lowResults)}">
+                暂无数据
+            </div>
+        </div>
+
+        <!-- 热门 -->
+        <div class="panel">
+            <h3>🔥 搜索最多的关键词</h3>
+            <table th:if="${topKeywords != null and !#lists.isEmpty(topKeywords)}">
+                <thead>
+                <tr><th>关键词</th><th>被搜次数</th><th>最后一次</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${topKeywords}">
+                    <td class="keyword" th:text="${r.keyword}">关键词</td>
+                    <td class="count ok" th:text="${r.count}">0</td>
+                    <td class="time"
+                        th:text="${r.lastTime != null} ? ${#temporals.format(r.lastTime, 'MM-dd HH:mm')} : ''"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${topKeywords == null or #lists.isEmpty(topKeywords)}">
+                暂无数据
+            </div>
+        </div>
+
+        <!-- 最近 -->
+        <div class="panel">
+            <h3>🕒 最近的搜索</h3>
+            <table th:if="${recent != null and !#lists.isEmpty(recent)}">
+                <thead>
+                <tr><th>关键词</th><th>来源</th><th>命中</th><th>原因</th><th>时间</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${recent}">
+                    <td class="keyword" th:text="${r.keyword}">关键词</td>
+                    <td>
+                        <span th:if="${r.source == 'agent'}" class="source-agent">🤖 AI</span>
+                        <span th:if="${r.source != 'agent'}" class="source-web">🔍 搜索框</span>
+                    </td>
+                    <td th:text="${r.resultCount}"
+                        th:style="${r.resultCount == 0} ? 'color:#e74c3c;font-weight:600' : ''"></td>
+                    <td style="font-size:12.5px;">
+                        <span th:if="${r.hint == 'NO_TYPE'}" style="color:#e74c3c;">词表不认识</span>
+                        <span th:if="${r.hint == 'TYPE_EMPTY'}" style="color:#e67e22;">平台没货</span>
+                        <span th:if="${r.hint == null}" style="color:#bbb;">—</span>
+                    </td>
+                    <td class="time"
+                        th:text="${r.createTime != null} ? ${#temporals.format(r.createTime, 'MM-dd HH:mm:ss')} : ''"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${recent == null or #lists.isEmpty(recent)}">
+                还没有搜索记录
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

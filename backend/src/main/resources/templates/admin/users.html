@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户账号管理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f5f5; }
+        .header { background-color: #333; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .header a { color: white; text-decoration: none; margin-left: 20px; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        .actions a { padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 13px; color: white; background-color: #3498db; }
+        .empty { text-align: center; padding: 40px; color: #999; }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+<div class="header">
+    <h1>校园二手交易平台 - 管理后台</h1>
+    <div>
+        <span>欢迎, [[${admin.username}]]</span>
+        <a href="/admin/dashboard">首页</a>
+        <a href="/admin/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>用户账号管理</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>用户名</th>
+            <th>学校</th>
+            <th>年级</th>
+            <th>手机号</th>
+            <th>信用状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${users.isEmpty()}">
+            <td colspan="7" class="empty">暂无用户</td>
+        </tr>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}">1</td>
+            <td th:text="${user.username}">admin</td>
+            <td th:text="${user.school != null ? user.school : '未填写'}">清华大学</td>
+            <td th:text="${user.grade != null ? user.grade : '未填写'}">大一</td>
+            <td th:text="${user.phone != null ? user.phone : '未填写'}">13800138000</td>
+            <td>
+                <span th:text="${user.creditStatus != null ? user.creditStatus : '正常'}">正常</span>
+            </td>
+            <td class="actions">
+                <a th:href="@{'/admin/users/' + ${user.id} + '/products'}">售卖商品</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

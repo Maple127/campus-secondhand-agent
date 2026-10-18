@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的订单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        header {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 12px;
+            font-size: 24px;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            padding-bottom: 20px;
+        }
+
+        /* ===== Tab 切换 ===== */
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #f0f0f0;
+            position: sticky;
+            top: 70px;
+            z-index: 9;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 14px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: #333;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab .badge {
+            display: inline-block;
+            background: #ff4400;
+            color: #fff;
+            font-size: 11px;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 4px;
+            font-weight: 500;
+        }
+
+        .tab .badge.zero {
+            background: #ccc;
+        }
+
+        /* ===== 订单列表 ===== */
+        .order-list-container {
+            display: none;
+        }
+
+        .order-list-container.active {
+            display: block;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: #999999;
+            font-size: 18px;
+            margin: 80px 0;
+        }
+
+        .order-card {
+            background: #fff;
+            margin: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-top {
+            height: 180px;
+            border-bottom: 1px solid #ddd;
+            background-size: cover;
+            background-position: center;
+            background-color: #eee;
+        }
+
+        .card-bottom {
+            padding: 16px;
+        }
+
+        .goods-name {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .price {
+            font-size: 26px;
+            color: #ff4500;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .address {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .status-unpaid {
+            color: #ff4500;
+        }
+        .status-paid {
+            color: #07c160;
+        }
+        .status-cancelled {
+            color: #999;
+        }
+        .status-shipped {
+            color: #667eea;
+        }
+        /* 「出售」栏还有两种不涉及订单的状态 */
+        .status-onsale {
+            color: #07c160;
+        }
+        .status-pending {
+            color: #f59e0b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-contact {
+            border: 1px solid #667eea;
+            color: #667eea;
+            background: #fff;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-contact:hover {
+            background: #667eea;
+            color: #fff;
+        }
+
+        .btn-comment {
+            background: linear-gradient(135deg, #ff735c, #ff4500);
+            color: #fff;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-comment:hover {
+            opacity: 0.8;
+        }
+
+        .btn-cancel {
+            border: 1px solid #ff4500;
+            color: #ff4500;
+            background: #fff;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: #ff4500;
+            color: #fff;
+        }
+
+        .btn-ship {
+            border: 1px solid #667eea;
+            color: #667eea;
+            background: #fff;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ship:hover {
+            background: #667eea;
+            color: #fff;
+        }
+
+        .seller-tag {
+            display: inline-block;
+            background: #fff3e0;
+            color: #e65100;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .buyer-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #0d47a1;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            z-index: 999;
+            display: none;
+            animation: fadeInDown 0.3s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* ===== 取消订单弹窗 ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px 28px 20px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            animation: scaleIn 0.25s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-box .modal-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .modal-box h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .modal-box p {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn-group button {
+            flex: 1;
+            padding: 10px 0;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .modal-btn-confirm {
+            background: #ff4500;
+            color: #fff;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #e03e00;
+        }
+
+        /* ===== 调试信息 ===== */
+        .debug-info {
+            background: #fff3cd;
+            padding: 15px;
+            margin: 10px;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+        }
+        .debug-info h4 {
+            color: #856404;
+        }
+        .debug-info .num {
+            color: red;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toast 提示 -->
+<div id="toast" class="toast"></div>
+
+<!-- 取消订单确认弹窗 -->
+<div class="modal-overlay" id="cancelModal">
+    <div class="modal-box">
+        <div class="modal-icon">⚠️</div>
+        <h3>确认取消订单</h3>
+        <p>取消后订单将无法恢复，确定要取消吗？</p>
+        <div class="modal-btn-group">
+            <button class="modal-btn-cancel" onclick="closeCancelModal()">再想想</button>
+            <button class="modal-btn-confirm" id="confirmCancelBtn">确认取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 顶部导航 ===== -->
+<header>
+    <a th:href="@{/my}">←</a>
+    我的订单
+</header>
+
+
+
+<!-- ===== Tab 切换 =====
+     默认停在「出售」：卖家打开这个页面最常看的是"我的东西卖出去了吗"。
+     「出售」里同时包含还没卖出去（待审核/出售中）的商品，
+     所以原来的「我的闲置」页面可以并进来，不再需要两个入口。 -->
+<div class="tabs">
+    <div class="tab active" data-tab="sell" onclick="switchTab('sell')">
+        📤 出售
+        <span class="badge" th:if="${sellNeedActionCount != null && sellNeedActionCount > 0}"
+              th:text="${sellNeedActionCount}"></span>
+    </div>
+    <div class="tab" data-tab="buy" onclick="switchTab('buy')">
+        📥 购买
+        <span class="badge" th:if="${buyUnpaidCount != null && buyUnpaidCount > 0}" th:text="${buyUnpaidCount}"></span>
+        <span class="badge zero" th:if="${buyUnpaidCount == null || buyUnpaidCount == 0}">0</span>
+    </div>
+</div>
+
+<!-- ===== 购买：我下的单（含历史全部订单） ===== -->
+<div class="order-list-container" id="buyList">
+    <div class="empty-tip" th:if="${buyOrders == null || #lists.isEmpty(buyOrders)}">
+        📦 还没有购买订单，去逛逛吧~
+    </div>
+
+    <div th:if="${buyOrders != null and !#lists.isEmpty(buyOrders)}">
+        <div th:each="item : ${buyOrders}" class="order-card">
+            <div class="card-top"
+                 th:style="'background-image: url(' + (${productMap[item.productId]?.image != null ? productMap[item.productId].image : '/images/default.png'}) + ');'">
+            </div>
+            <div class="card-bottom">
+                <div class="goods-name">
+                    <span th:text="${productMap[item.productId]?.name != null ? productMap[item.productId].name : '商品已下架'}"></span>
+                    <span class="buyer-tag">👤 买家</span>
+                </div>
+                <div class="price">¥<span th:text="${item.price}"></span></div>
+                <div class="address">📍 <span th:text="${productMap[item.productId]?.location != null ? productMap[item.productId].location : '未知地点'}"></span></div>
+
+                <div class="status-row">
+                    <div class="status-text">
+                        <span th:if="${item.status == 'UNPAID'}" class="status-unpaid">⏳ 待支付</span>
+                        <span th:if="${item.status == 'PAID'}" class="status-paid">✅ 已支付待交易</span>
+                        <span th:if="${item.status == 'SHIPPED'}" class="status-shipped">📦 已支付待交易（已发货）</span>
+                        <span th:if="${item.status == 'COMPLETED'}" class="status-shipped">🎉 购买成功</span>
+                        <span th:if="${item.status == 'CANCELLED'}" class="status-cancelled">❌ 已取消</span>
+                    </div>
+
+                    <div class="btn-group">
+                        <button th:if="${item.status == 'UNPAID'}"
+                                class="btn-cancel"
+                                th:data-order-no="${item.orderNo}"
+                                onclick="showCancelModal(this.dataset.orderNo)">
+                            取消订单
+                        </button>
+
+                        <!-- 待支付的单要能直接去付款。
+                             注意：/order/pay 是 POST 接口（需要带支付密码），
+                             所以这里只能跳到订单详情页由它提交表单，
+                             不能直接写成 <a href="/order/pay">。 -->
+                        <a th:if="${item.status == 'UNPAID'}"
+                           th:href="@{/order/detail(orderNo=${item.orderNo})}"
+                           class="btn-ship">去支付</a>
+
+                        <a th:if="${item.status != 'UNPAID'}"
+                           th:href="@{/order/detail(orderNo=${item.orderNo})}"
+                           class="btn-comment">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 出售：我发布的商品 + 交易进展 =====
+     这里列的是**商品**而不是订单，因为「待审核」「出售中」根本没有订单。
+     只看订单表的话，刚发布的商品在"我的订单"里是不存在的 ——
+     这正是原来必须单独做一个「我的闲置」页面的原因。
+     现在两者合并：一个页面看完"我这件东西现在怎么样了"。 -->
+<div class="order-list-container active" id="sellList">
+    <div class="empty-tip" th:if="${sellItems == null || #lists.isEmpty(sellItems)}">
+        📦 还没有发布过商品，点右下角「＋」发布第一件闲置吧~
+    </div>
+
+    <div th:if="${sellItems != null and !#lists.isEmpty(sellItems)}">
+        <div th:each="item : ${sellItems}" class="order-card">
+            <div class="card-top"
+                 th:style="'background-image: url(' + (${item.product.image != null and !item.product.image.isEmpty()} ? ${item.product.image} : '/images/default.png') + ');'">
+            </div>
+            <div class="card-bottom">
+                <div class="goods-name">
+                    <a th:href="@{'/product/' + ${item.product.id}}"
+                       th:text="${item.product.name}"
+                       style="color:inherit; text-decoration:none;">商品名</a>
+                    <span class="seller-tag">👤 卖家</span>
+                </div>
+                <div class="price">¥<span th:text="${item.product.price}"></span></div>
+                <div class="address">📍 <span
+                        th:text="${item.product.location != null and !item.product.location.isEmpty()} ? ${item.product.location} : '未知地点'"></span></div>
+
+                <div class="status-row">
+                    <div class="status-text">
+                        <span th:class="'status-' + ${item.stageClass}" th:text="${item.stage}">状态</span>
+                    </div>
+
+                    <div class="btn-group">
+                        <!-- 买家已付款、卖家还没发货：卖家最需要处理的一步 -->
+                        <button th:if="${item.needsShip}"
+                                class="btn-ship"
+                                th:data-order-no="${item.order.orderNo}"
+                                onclick="shipOrder(this.dataset.orderNo)">
+                            📦 确认发货
+                        </button>
+
+                        <!-- 出售中 → 可下架 -->
+                        <button th:if="${item.product.status == 1}"
+                                class="btn-cancel"
+                                th:data-product-id="${item.product.id}"
+                                onclick="delistProduct(this.dataset.productId)">
+                            下架
+                        </button>
+
+                        <!-- 已下架 / 审核未通过 → 可重新提交 -->
+                        <button th:if="${item.product.status == 2 or item.product.status == 3}"
+                                class="btn-comment"
+                                th:data-product-id="${item.product.id}"
+                                onclick="relistProduct(this.dataset.productId)">
+                            ↻ 重新提交审核
+                        </button>
+
+                        <!-- 审核未通过要把原因显示出来，否则用户不知道为什么被拒 -->
+                        <span th:if="${item.product.status == 2 and item.product.rejectReason != null}"
+                              th:text="'驳回原因：' + ${item.product.rejectReason}"
+                              style="color:#d33; font-size:13px;"></span>
+
+                        <a th:if="${item.order != null}"
+                           th:href="@{/order/detail(orderNo=${item.order.orderNo})}"
+                           class="btn-comment">查看订单</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var currentOrderNo = null;
+
+    // ===== Tab 切换 =====
+    function switchTab(tabName) {
+        var tabs = document.querySelectorAll('.tab');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        document.querySelector('.tab[data-tab="' + tabName + '"]').classList.add('active');
+
+        var containers = document.querySelectorAll('.order-list-container');
+        for (var i = 0; i < containers.length; i++) {
+            containers[i].classList.remove('active');
+        }
+
+        if (tabName === 'buy') {
+            document.getElementById('buyList').classList.add('active');
+        } else {
+            document.getElementById('sellList').classList.add('active');
+        }
+    }
+
+    // ===== Toast 提示 =====
+    function showToast(message) {
+        var toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(function() {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+
+    // ===== 取消订单 =====
+    function showCancelModal(orderNo) {
+        currentOrderNo = orderNo;
+        document.getElementById('cancelModal').classList.add('show');
+        document.getElementById('confirmCancelBtn').onclick = function() {
+            cancelOrder(currentOrderNo);
+        };
+    }
+
+    function closeCancelModal() {
+        document.getElementById('cancelModal').classList.remove('show');
+        currentOrderNo = null;
+    }
+
+    function cancelOrder(orderNo) {
+        fetch('/order/cancel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'orderNo=' + encodeURIComponent(orderNo)
+        })
+            .then(function(response) {
+                if (response.ok) {
+                    closeCancelModal();
+                    showToast('✅ 订单已取消');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                } else {
+                    response.text().then(function(text) {
+                        showToast('❌ ' + text);
+                    });
+                }
+            })
+            .catch(function(error) {
+                showToast('❌ 取消失败，请稍后重试');
+                console.error('Error:', error);
+            });
+    }
+
+    // ===== 确认发货 =====
+    function shipOrder(orderNo) {
+        if (!confirm('确认已发货吗？')) {
+            return;
+        }
+
+        fetch('/order/ship', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'orderNo=' + encodeURIComponent(orderNo)
+        })
+            .then(function(response) {
+                if (response.ok) {
+                    showToast('✅ 发货成功');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                } else {
+                    response.text().then(function(text) {
+                        showToast('❌ ' + text);
+                    });
+                }
+            })
+            .catch(function(error) {
+                showToast('❌ 发货失败，请重试');
+                console.error('Error:', error);
+            });
+    }
+
+    // ===== 卖家：下架 / 重新提交审核 =====
+    // 「我的闲置」页面并入本页后，这两个操作要跟着搬过来
+    function delistProduct(productId) {
+        if (!confirm('确认下架这件商品吗？下架后首页将不再展示。')) {
+            return;
+        }
+        postForm('/product/' + productId + '/delist', '', '✅ 已下架');
+    }
+
+    function relistProduct(productId) {
+        if (!confirm('重新提交审核？通过后会重新上架。')) {
+            return;
+        }
+        postForm('/product/' + productId + '/relist', '', '✅ 已重新提交审核');
+    }
+
+    /** 统一的表单式 POST（后端这几个接口用 @RequestParam，不是 JSON） */
+    function postForm(url, body, okTip) {
+        fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: body
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    showToast(okTip);
+                    setTimeout(function () { location.reload(); }, 500);
+                } else {
+                    response.text().then(function (text) {
+                        showToast('❌ ' + text);
+                    });
+                }
+            })
+            .catch(function (error) {
+                showToast('❌ 操作失败，请重试');
+                console.error('Error:', error);
+            });
+    }
+
+    // ===== 弹窗关闭 =====
+    document.getElementById('cancelModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCancelModal();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeCancelModal();
+        }
+    });
+</script>
+
+</body>
+</html>

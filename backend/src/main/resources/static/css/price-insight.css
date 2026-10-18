@@ -1,0 +1,173 @@
+/* ============================================================
+   价格参考组件
+   作用域限制在 #priceInsight / .pi-* 内，避免污染既有页面样式
+   ============================================================ */
+
+.pi-panel {
+    margin: 14px 0 0;
+    padding: 14px 15px;
+    background: linear-gradient(160deg, #f8f9ff, #eef1fb);
+    border: 1px solid #e0e5f5;
+    border-radius: 14px;
+}
+
+.pi-panel[hidden] { display: none; }
+
+.pi-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.pi-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3f4a68;
+}
+
+.pi-verdict {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+}
+
+.pi-verdict.low  { background: #e0f2fe; color: #0369a1; }
+.pi-verdict.fair { background: #dcfce7; color: #15803d; }
+.pi-verdict.high { background: #fee2e2; color: #b91c1c; }
+.pi-verdict.na   { background: #e5e7eb; color: #6b7280; }
+
+/* ---------- 区间条 ---------- */
+.pi-bar-wrap { margin-bottom: 10px; }
+
+.pi-bar {
+    position: relative;
+    height: 7px;
+    background: #e2e7f5;
+    border-radius: 99px;
+    overflow: visible;
+}
+
+/* 常见区间（p25~p75）高亮 */
+.pi-bar-range {
+    position: absolute;
+    height: 100%;
+    background: linear-gradient(90deg, #a5b4fc, #818cf8);
+    border-radius: 99px;
+}
+
+/* 中位数刻度 */
+.pi-bar-median {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 13px;
+    background: #4f46e5;
+    border-radius: 2px;
+}
+
+.pi-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #8b93ab;
+    margin-top: 5px;
+}
+
+.pi-scale-mid { color: #4f46e5; font-weight: 600; }
+
+/* ---------- 事实行 ---------- */
+.pi-facts {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.pi-fact {
+    flex: 1;
+    background: #fff;
+    border-radius: 9px;
+    padding: 7px 9px;
+    text-align: center;
+}
+
+.pi-fact-label {
+    font-size: 11px;
+    color: #98a0b8;
+    margin-bottom: 2px;
+}
+
+.pi-fact-value {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #33405c;
+}
+
+.pi-explain {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #5b6478;
+    background: #fff;
+    border-radius: 9px;
+    padding: 9px 11px;
+}
+
+.pi-samples {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #8b93ab;
+    line-height: 1.9;
+}
+
+.pi-samples .pi-sample {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pi-samples .pi-sample span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- 发布页变体：更紧凑 ---------- */
+.pi-panel.pi-compact {
+    margin: 8px 0 0;
+    padding: 11px 12px;
+    background: #f7f8fc;
+    border-color: #e6e9f3;
+}
+
+.pi-panel.pi-compact .pi-bar-wrap,
+.pi-panel.pi-compact .pi-samples {
+    display: none;
+}
+
+.pi-panel.pi-compact .pi-facts {
+    margin-bottom: 8px;
+}
+
+.pi-panel.pi-compact .pi-fact {
+    background: transparent;
+    padding: 0;
+}
+
+.pi-hint-price {
+    font-size: 12.5px;
+    padding: 8px 11px;
+    border-radius: 9px;
+    margin-top: 7px;
+    line-height: 1.6;
+}
+
+.pi-hint-price.low  { background: #e0f2fe; color: #075985; }
+.pi-hint-price.fair { background: #dcfce7; color: #166534; }
+.pi-hint-price.high { background: #fee2e2; color: #991b1b; }
+.pi-hint-price.na   { background: #f1f5f9; color: #64748b; }
+
+@media (max-width: 480px) {
+    .pi-facts { flex-wrap: wrap; }
+    .pi-fact { min-width: 30%; }
+}

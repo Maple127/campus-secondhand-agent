@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局订单管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .status-paid {
+            color: #27ae60;
+        }
+        .status-completed {
+            color: #3498db;
+        }
+        .status-cancelled {
+            color: #e74c3c;
+        }
+
+        .actions a {
+            margin-right: 10px;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+            background-color: #3498db;
+            color: white;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/_backbar :: bar}"></div>
+<div class="header">
+    <h1>校园二手交易平台 - 管理后台</h1>
+    <div>
+        <span>欢迎, [[${admin.username}]]</span>
+        <a href="/admin/dashboard">首页</a>
+        <a href="/admin/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>全局订单管理</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>订单编号</th>
+            <th>买家</th>
+            <th>商品</th>
+            <th>卖家</th>
+            <th>金额</th>
+            <th>状态</th>
+            <th>创建时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${orders.isEmpty()}">
+            <td colspan="8" class="empty">暂无订单</td>
+        </tr>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.orderNo}">#20260001</td>
+            <td th:text="${userNameMap[order.userId]}">买家名</td>
+            <td th:text="${productNameMap[order.productId]}">商品名</td>
+            <td th:text="${userNameMap[order.sellerId]}">卖家名</td>
+            <td>¥<span th:text="${order.price}">0.00</span></td>
+            <td>
+    <span th:switch="${order.status}">
+        <span th:case="'unpaid'" class="status-pending" style="color:#f39c12;">未付款</span>
+        <span th:case="'paid'" class="status-paid">已付款</span>
+        <span th:case="'shipping'" class="status-shipping" style="color:#3498db;">配送中</span>
+        <span th:case="'completed'" class="status-completed" style="color:#27ae60;">已售出</span>
+        <span th:case="'sold'" class="status-completed" style="color:#27ae60;">已售出</span>
+        <!-- 如果有 cancelled 状态，可加一行 -->
+        <span th:case="'cancelled'" class="status-cancelled" style="color:#e74c3c;">已取消</span>
+        <span th:case="*" th:text="${order.status}">异常</span>
+    </span>
+            </td>
+            <td th:text="${#temporals.format(order.createTime, 'yyyy-MM-dd HH:mm')}">2026-06-28 17:30</td>
+            <td class="actions">
+                <a th:href="@{'/admin/orders/' + ${order.id}}">详情</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
