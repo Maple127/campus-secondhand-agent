@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园二手交易平台 - 管理系统设计文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        h2 {
+            color: #3498db;
+            font-size: 18px;
+            margin: 25px 0 15px 0;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+        }
+
+        h4 {
+            color: #555;
+            font-size: 14px;
+            margin: 15px 0 8px 0;
+        }
+
+        p {
+            margin: 10px 0;
+            text-indent: 2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        ul, ol {
+            margin: 10px 0 10px 30px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .code-block {
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: "Consolas", "Monaco", monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            border-left: 4px solid #3498db;
+        }
+
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .doc-info {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .doc-info p {
+            text-indent: 0;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 5px 0;
+        }
+
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .seq-diagram {
+            background-color: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: "Consolas", monospace;
+            font-size: 11px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .priority-high {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .priority-medium {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .priority-low {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 文档信息 -->
+        <div class="doc-info">
+            <p><strong>项目名称</strong>：校园二手交易平台管理系统</p>
+            <p><strong>文档版本</strong>：V1.0</p>
+            <p><strong>创建日期</strong>：2026-06-24</p>
+            <p><strong>技术栈</strong>：Spring Boot 4.1.0 + Thymeleaf + MySQL + Hibernate</p>
+        </div>
+
+        <!-- 目录 -->
+        <div class="toc">
+            <h3>目录</h3>
+            <ul>
+                <li><a href="#admin">1. 管理员账号管理</a>
+                    <ul>
+                        <li><a href="#admin-login">1.1 登录认证流程</a></li>
+                        <li><a href="#admin-logout">1.2 退出登录流程</a></li>
+                        <li><a href="#admin-password">1.3 密码修改流程</a></li>
+                    </ul>
+                </li>
+                <li><a href="#product">2. 商品审核与管理</a>
+                    <ul>
+                        <li><a href="#product-add">2.1 商品发布流程</a></li>
+                        <li><a href="#product-review">2.2 商品审核流程</a></li>
+                        <li><a href="#product-action">2.3 审核操作流程</a></li>
+                    </ul>
+                </li>
+                <li><a href="#category">3. 商品分类管理</a>
+                    <ul>
+                        <li><a href="#category-add">3.1 添加分类流程</a></li>
+                        <li><a href="#category-edit">3.2 编辑分类流程</a></li>
+                        <li><a href="#category-delete">3.3 删除分类流程</a></li>
+                    </ul>
+                </li>
+                <li><a href="#testcases">4. 详细测试用例</a>
+                    <ul>
+                        <li><a href="#test-admin">4.1 管理员账号管理测试用例</a></li>
+                        <li><a href="#test-product">4.2 商品审核与管理测试用例</a></li>
+                        <li><a href="#test-category">4.3 商品分类管理测试用例</a></li>
+                    </ul>
+                </li>
+                <li><a href="#appendix">附录</a></li>
+            </ul>
+        </div>
+
+        <!-- 1. 管理员账号管理 -->
+        <h2 id="admin">1. 管理员账号管理</h2>
+
+        <h3 id="admin-login">1.1 登录认证流程</h3>
+        <p>管理员登录认证流程负责验证管理员身份，确保只有合法用户才能访问系统管理功能。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌─────────┐     ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  用户   │     │   浏览器    │     │AdminController│    │AdminRepository│ │   数据库   │
+└────┬────┘     └──────┬──────┘     └───────┬──────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                      │                  │                │
+     │ 1.访问登录页     │                      │                  │                │
+     │─────────────────>│                      │                  │                │
+     │                  │ 2.GET /admin/login   │                  │                │
+     │                  │─────────────────────>                  │                │
+     │                  │                      │                  │                │
+     │                  │ 3.返回登录页面        │                  │                │
+     │                  │<─────────────────────                  │                │
+     │                  │                      │                  │                │
+     │ 4.提交登录表单    │                      │                  │                │
+     │ (username,password)│                    │                  │                │
+     │─────────────────>│                      │                  │                │
+     │                  │ 5.POST /admin/doLogin│                  │                │
+     │                  │ (username,password)   │                  │                │
+     │                  │─────────────────────>                  │                │
+     │                  │                      │                  │                │
+     │                  │                      │ 6.findByUsername│                │
+     │                  │                      │    AndPassword  │                │
+     │                  │                      │─────────────────>│                │
+     │                  │                      │                  │ 7.SELECT查询   │
+     │                  │                      │                  │───────────────>│
+     │                  │                      │                  │<───────────────│
+     │                  │                      │                  │                │
+     │                  │                      │ 8.返回Admin对象   │                │
+     │                  │                      │<─────────────────│                │
+     │                  │                      │                  │                │
+     │ 9a.登录成功       │                      │                  │                │
+     │   重定向到仪表盘   │                      │                  │                │
+     │<─────────────────│                      │                  │                │
+     │                  │                      │                  │                │
+     │ 9b.登录失败       │                      │                  │                │
+     │   重定向回登录页   │                      │                  │                │
+     │<─────────────────│                      │                  │                │
+        </div>
+
+        <h4>流程说明</h4>
+        <ol>
+            <li>用户访问登录页面 <code>/admin/login</code></li>
+            <li>系统返回登录表单页面</li>
+            <li>用户填写用户名和密码并提交</li>
+            <li>后端调用 <code>AdminRepository.findByUsernameAndPassword()</code> 验证凭证</li>
+            <li>验证成功：将管理员信息存入Session，重定向到仪表盘</li>
+            <li>验证失败：返回错误消息，重定向回登录页</li>
+        </ol>
+
+        <h3 id="admin-logout">1.2 退出登录流程</h3>
+        <p>退出登录流程确保管理员安全退出系统，销毁Session以防止未授权访问。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌─────────┐     ┌─────────────┐     ┌─────────────┐
+│  用户   │     │   浏览器    │     │AdminController│
+└────┬────┘     └──────┬──────┘     └──────┬──────┘
+     │                  │                    │
+     │ 1.点击退出登录    │                    │
+     │─────────────────>│                    │
+     │                  │ 2.GET /admin/logout│
+     │                  │───────────────────>│
+     │                  │                    │
+     │                  │ 3.session.invalidate()│
+     │                  │                    │
+     │ 4.重定向到登录页  │                    │
+     │<─────────────────│                    │
+        </div>
+
+        <h4>流程说明</h4>
+        <ol>
+            <li>用户点击"退出登录"链接</li>
+            <li>后端调用 <code>session.invalidate()</code> 销毁Session</li>
+            <li>重定向到登录页面</li>
+        </ol>
+
+        <h3 id="admin-password">1.3 密码修改流程</h3>
+        <p>密码修改流程确保管理员可以安全地更新密码，包含严格的验证机制。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌─────────┐     ┌─────────────┐     ┌─────────────┐     ┌────────────┐     ┌──────────┐
+│  用户   │     │   浏览器    │     │AdminController│    │AdminRepository│ │   数据库   │
+└────┬────┘     └──────┬──────┘     └──────┬──────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                    │                  │                │
+     │ 1.访问修改密码页  │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 2.GET /admin/changePassword│          │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 3.检查登录状态    │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │                │
+     │                  │ 4.返回修改密码页面   │                  │                │
+     │                  │<───────────────────│                  │                │
+     │                  │                    │                  │                │
+     │ 5.提交修改表单    │                    │                  │                │
+     │ (oldPassword,   │                    │                  │                │
+     │  newPassword,   │                    │                  │                │
+     │  confirmPassword)                   │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 6.POST /admin/changePassword│       │                │
+     │                  │ (oldPassword,      │                  │                │
+     │                  │  newPassword,      │                  │                │
+     │                  │  confirmPassword)  │                  │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 7.验证原密码      │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 8.查询验证     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 9a.验证失败       │                    │                  │                │
+     │   返回错误信息    │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+     │                  │                    │                  │                │
+     │ 9b.验证成功      │                    │                  │                │
+     │   保存新密码      │                    │                  │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 10.UPDATE     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 11.重定向到仪表盘  │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+        </div>
+
+        <h4>流程说明</h4>
+        <ol>
+            <li>用户访问修改密码页面</li>
+            <li>系统验证用户已登录</li>
+            <li>返回修改密码表单页面</li>
+            <li>用户填写原密码、新密码、确认密码</li>
+            <li>后端验证原密码是否正确</li>
+            <li>验证新密码和确认密码是否一致</li>
+            <li>更新数据库中的密码</li>
+            <li>重定向到仪表盘并显示成功消息</li>
+        </ol>
+
+        <!-- 2. 商品审核与管理 -->
+        <h2 id="product">2. 商品审核与管理</h2>
+
+        <h3 id="product-add">2.1 商品发布流程</h3>
+        <p>商品发布流程允许用户提交二手商品信息，提交后进入审核队列等待管理员审核。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌─────────┐     ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  用户   │     │   浏览器    │     │ProductController│  │ProductRepository│ │   数据库   │
+└────┬────┘     └──────┬──────┘     └───────┬──────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                      │                  │                │
+     │ 1.填写商品信息    │                      │                  │                │
+     │ (name,price,    │                      │                  │                │
+     │  description,   │                      │                  │                │
+     │  category)      │                      │                  │                │
+     │─────────────────>│                      │                  │                │
+     │                  │ 2.POST /product/add  │                  │                │
+     │                  │ (name,price,         │                  │                │
+     │                  │  description,        │                  │                │
+     │                  │  category,images)   │                  │                │
+     │                  │─────────────────────>                  │                │
+     │                  │                      │ 3.保存商品       │                │
+     │                  │                      │   status=0(待审核)│                │
+     │                  │                      │─────────────────>│                │
+     │                  │                      │                  │ 4.INSERT     │
+     │                  │                      │                  │───────────────>│
+     │                  │                      │                  │<───────────────│
+     │                  │                      │                  │                │
+     │ 5.显示成功消息    │                      │                  │                │
+     │ "上传成功，待审核" │                      │                  │                │
+     │<─────────────────│                      │                  │                │
+        </div>
+
+        <h4>流程说明</h4>
+        <ol>
+            <li>用户填写商品信息（名称、价格、描述、分类、图片）</li>
+            <li>后端创建Product对象，status设置为0（待审核）</li>
+            <li>保存到数据库</li>
+            <li>返回成功消息"上传成功，待审核"</li>
+        </ol>
+
+        <h3 id="product-review">2.2 商品审核流程</h3>
+        <p>商品审核流程允许管理员查看待审核商品并进行审核操作。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌──────────┐    ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  管理员   │    │   浏览器    │     │AdminController│    │ProductRepository││   数据库   │
+└────┬─────┘    └──────┬──────┘     └──────┬───────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                    │                  │                │
+     │ 1.访问审核列表    │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 2.GET /admin/products│                │                │
+     │                  │ (status=0)         │                  │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 3.查询待审核商品   │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 4.SELECT     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │                  │ 5.返回审核列表页面  │                  │                │
+     │ 6.查看待审核商品   │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+     │                  │                    │                  │                │
+     │ 7.点击"通过"按钮  │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 8.GET /admin/product/{id}/approve│    │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 9.更新status=1   │                │
+     │                  │                    │ (审核通过)       │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 10.UPDATE    │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 11.重定向到审核列表│                    │                  │                │
+     │   显示成功消息    │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+        </div>
+
+        <h4>流程说明</h4>
+        <ol>
+            <li>管理员访问商品审核页面 <code>GET /admin/products?status=0</code></li>
+            <li>查询所有待审核商品（status=0）</li>
+            <li>返回审核列表页面</li>
+            <li>管理员查看商品详情或直接操作</li>
+            <li>点击"通过"按钮，status更新为1（已通过）</li>
+            <li>重定向回审核列表，显示成功消息</li>
+        </ol>
+
+        <h3 id="product-action">2.3 审核操作流程</h3>
+        <p>审核操作包括审核拒绝和删除商品两个核心功能。</p>
+
+        <h4>审核拒绝序列图</h4>
+        <div class="seq-diagram">
+┌──────────┐    ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  管理员   │    │   浏览器    │     │AdminController│    │ProductRepository││   数据库   │
+└────┬─────┘    └──────┬──────┘     └──────┬───────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                    │                  │                │
+     │ 1.点击"拒绝"按钮  │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 2.显示拒绝弹窗      │                  │                │
+     │ 3.填写拒绝原因    │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 3.POST /admin/product/{id}/reject│   │                │
+     │                  │ (rejectReason)     │                  │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 4.更新status=2   │                │
+     │                  │                    │ (审核拒绝)       │                │
+     │                  │                    │ 设置rejectReason │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 5.UPDATE     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 6.重定向到审核列表 │                    │                  │                │
+     │   显示拒绝成功    │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+        </div>
+
+        <h4>删除商品序列图</h4>
+        <div class="seq-diagram">
+┌──────────┐    ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  管理员   │    │   浏览器    │     │AdminController│    │ProductRepository││   数据库   │
+└────┬─────┘    └──────┬──────┘     └──────┬───────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                    │                  │                │
+     │ 1.点击"删除"按钮  │                    │                  │                │
+     │   (确认删除)     │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 2.GET /admin/product/{id}/delete│    │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 3.删除商品记录   │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 4.DELETE     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 4.重定向到商品列表 │                    │                  │                │
+     │   显示删除成功    │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+        </div>
+
+        <!-- 3. 商品分类管理 -->
+        <h2 id="category">3. 商品分类管理</h2>
+
+        <h3 id="category-add">3.1 添加分类流程</h3>
+        <p>添加分类流程允许管理员创建新的商品分类。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌──────────┐    ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  管理员   │    │   浏览器    │     │AdminController│    │CategoryRepository││   数据库   │
+└────┬─────┘    └──────┬──────┘     └──────┬───────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                    │                  │                │
+     │ 1.访问添加分类页  │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 2.GET /admin/category/add│            │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 3.检查登录状态    │                │
+     │                  │                    │                  │                │
+     │                  │ 4.返回添加分类页面   │                  │                │
+     │                  │<───────────────────│                  │                │
+     │                  │                    │                  │                │
+     │ 5.填写分类信息    │                    │                  │                │
+     │   (name,description)│                 │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 6.POST /admin/category/add│         │                │
+     │                  │ (name,description) │                  │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 7.检查名称是否已存在│                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 8.SELECT     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 9a.名称已存在    │                    │                  │                │
+     │   返回错误消息    │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+     │                  │                    │                  │                │
+     │ 9b.名称可用      │                    │                  │                │
+     │   保存分类       │                    │                  │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 10.INSERT    │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 11.重定向到分类列表│                    │                  │                │
+     │    显示添加成功   │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+        </div>
+
+        <h4>流程说明</h4>
+        <ol>
+            <li>管理员访问添加分类页面</li>
+            <li>填写分类名称和描述</li>
+            <li>后端检查分类名称是否已存在</li>
+            <li>名称唯一则保存到数据库</li>
+            <li>重定向到分类列表页面</li>
+        </ol>
+
+        <h3 id="category-edit">3.2 编辑分类流程</h3>
+        <p>编辑分类流程允许管理员修改现有分类信息。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌──────────┐    ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  管理员   │    │   浏览器    │     │AdminController│    │CategoryRepository││   数据库   │
+└────┬─────┘    └──────┬──────┘     └──────┬───────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                    │                  │                │
+     │ 1.点击"编辑"按钮  │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 2.GET /admin/category/{id}/edit│     │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 3.查询分类详情    │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 4.SELECT     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │                  │ 5.返回编辑页面      │                  │                │
+     │ 6.修改分类信息    │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+     │                  │ 7.POST /admin/category/{id}/edit│   │                │
+     │                  │ (name,description) │                  │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 8.检查名称是否冲突 │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 9.SELECT     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 10a.名称冲突      │                    │                  │                │
+     │    返回错误消息   │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+     │                  │                    │                  │                │
+     │ 10b.名称可用     │                    │                  │                │
+     │    更新分类      │                    │                  │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 11.UPDATE    │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 12.重定向到分类列表│                    │                  │                │
+     │    显示更新成功   │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+        </div>
+
+        <h3 id="category-delete">3.3 删除分类流程</h3>
+        <p>删除分类流程允许管理员删除不再需要的商品分类。</p>
+
+        <h4>序列图</h4>
+        <div class="seq-diagram">
+┌──────────┐    ┌─────────────┐     ┌──────────────┐     ┌────────────┐     ┌──────────┐
+│  管理员   │    │   浏览器    │     │AdminController│    │CategoryRepository││   数据库   │
+└────┬─────┘    └──────┬──────┘     └──────┬───────┘     └─────┬──────┘     └────┬─────┘
+     │                  │                    │                  │                │
+     │ 1.点击"删除"按钮  │                    │                  │                │
+     │   (确认删除)     │                    │                  │                │
+     │─────────────────>│                    │                  │                │
+     │                  │ 2.GET /admin/category/{id}/delete│   │                │
+     │                  │───────────────────>│                  │                │
+     │                  │                    │ 3.检查登录状态    │                │
+     │                  │                    │                  │                │
+     │                  │                    │ 4.删除分类记录    │                │
+     │                  │                    │─────────────────>│                │
+     │                  │                    │                  │ 5.DELETE     │
+     │                  │                    │                  │───────────────>│
+     │                  │                    │                  │<───────────────│
+     │                  │                    │                  │                │
+     │ 6.重定向到分类列表 │                    │                  │                │
+     │   显示删除成功    │                    │                  │                │
+     │<─────────────────│                    │                  │                │
+        </div>
+
+        <!-- 4. 详细测试用例 -->
+        <h2 id="testcases">4. 详细测试用例</h2>
+
+        <h3 id="test-admin">4.1 管理员账号管理测试用例</h3>
+
+        <table>
+            <tr>
+                <th>测试用例ID</th>
+                <th>测试名称</th>
+                <th>测试目标</th>
+                <th>优先级</th>
+                <th>测试步骤</th>
+                <th>预期结果</th>
+                <th>测试数据</th>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-001</td>
+                <td>管理员登录成功</td>
+                <td>验证正确用户名密码可登录</td>
+                <td class="priority-high">P0</td>
+                <td>1.访问登录页<br>2.输入admin/admin<br>3.点击登录</td>
+                <td>重定向到仪表盘，显示欢迎信息</td>
+                <td>用户名: admin<br>密码: admin</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-002</td>
+                <td>登录失败-用户名错误</td>
+                <td>验证错误用户名无法登录</td>
+                <td class="priority-medium">P1</td>
+                <td>1.访问登录页<br>2.输入wronguser/admin<br>3.点击登录</td>
+                <td>显示错误消息，停留在登录页</td>
+                <td>用户名: wronguser<br>密码: admin</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-003</td>
+                <td>登录失败-密码错误</td>
+                <td>验证错误密码无法登录</td>
+                <td class="priority-medium">P1</td>
+                <td>1.访问登录页<br>2.输入admin/wrongpwd<br>3.点击登录</td>
+                <td>显示错误消息，停留在登录页</td>
+                <td>用户名: admin<br>密码: wrongpwd</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-004</td>
+                <td>登录失败-用户名为空</td>
+                <td>验证用户名为空无法提交</td>
+                <td class="priority-low">P2</td>
+                <td>1.访问登录页<br>2.留空用户名<br>3.输入密码<br>4.点击登录</td>
+                <td>HTML5验证提示，无法提交</td>
+                <td>用户名: 空<br>密码: admin</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-005</td>
+                <td>管理员退出登录</td>
+                <td>验证退出后Session销毁</td>
+                <td class="priority-medium">P1</td>
+                <td>1.已登录状态<br>2.点击退出登录<br>3.访问仪表盘</td>
+                <td>重定向到登录页</td>
+                <td>无</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-006</td>
+                <td>修改密码成功</td>
+                <td>验证正确原密码可修改密码</td>
+                <td class="priority-high">P0</td>
+                <td>1.访问修改密码页<br>2.输入原密码和新密码<br>3.点击保存</td>
+                <td>显示成功消息，重定向到仪表盘</td>
+                <td>原密码: admin<br>新密码: newpwd123</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-007</td>
+                <td>修改密码失败-原密码错误</td>
+                <td>验证原密码错误无法修改</td>
+                <td class="priority-medium">P1</td>
+                <td>1.访问修改密码页<br>2.输入错误原密码<br>3.点击保存</td>
+                <td>显示错误消息"原密码错误"</td>
+                <td>原密码: wrongpwd</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-008</td>
+                <td>修改密码失败-密码不一致</td>
+                <td>验证新密码不一致无法修改</td>
+                <td class="priority-medium">P1</td>
+                <td>1.访问修改密码页<br>2.输入不一致的新密码<br>3.点击保存</td>
+                <td>显示错误消息"两次输入的密码不一致"</td>
+                <td>新密码: pwd1<br>确认: pwd2</td>
+            </tr>
+            <tr>
+                <td>TC-ADMIN-009</td>
+                <td>未登录访问受保护页面</td>
+                <td>验证未登录自动重定向</td>
+                <td class="priority-high">P0</td>
+                <td>1.清除Session<br>2.直接访问/products</td>
+                <td>重定向到登录页</td>
+                <td>无</td>
+            </tr>
+        </table>
+
+        <h3 id="test-product">4.2 商品审核与管理测试用例</h3>
+
+        <table>
+            <tr>
+                <th>测试用例ID</th>
+                <th>测试名称</th>
+                <th>测试目标</th>
+                <th>优先级</th>
+                <th>测试步骤</th>
+                <th>预期结果</th>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-001</td>
+                <td>查看待审核商品列表</td>
+                <td>验证可查看待审核商品</td>
+                <td class="priority-high">P0</td>
+                <td>1.访问/products?status=0</td>
+                <td>显示待审核商品列表</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-002</td>
+                <td>审核通过单个商品</td>
+                <td>验证审核通过功能</td>
+                <td class="priority-high">P0</td>
+                <td>1.访问待审核列表<br>2.点击"通过"按钮</td>
+                <td>商品状态变为已通过</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-003</td>
+                <td>审核拒绝单个商品</td>
+                <td>验证审核拒绝功能</td>
+                <td class="priority-high">P0</td>
+                <td>1.点击"拒绝"按钮<br>2.填写拒绝原因<br>3.确认拒绝</td>
+                <td>商品状态变为已拒绝</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-004</td>
+                <td>拒绝时不填写原因</td>
+                <td>验证拒绝原因必填</td>
+                <td class="priority-low">P2</td>
+                <td>1.点击"拒绝"按钮<br>2.留空原因<br>3.点击确认</td>
+                <td>表单验证提示</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-005</td>
+                <td>删除商品</td>
+                <td>验证删除商品功能</td>
+                <td class="priority-medium">P1</td>
+                <td>1.点击"删除"链接<br>2.确认删除</td>
+                <td>商品从列表中删除</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-006</td>
+                <td>删除时取消确认</td>
+                <td>验证取消删除操作</td>
+                <td class="priority-low">P2</td>
+                <td>1.点击"删除"链接<br>2.点击取消</td>
+                <td>商品未被删除</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-007</td>
+                <td>查看商品详情</td>
+                <td>验证可查看商品详情</td>
+                <td class="priority-medium">P1</td>
+                <td>1.点击"详情"链接</td>
+                <td>显示商品完整信息</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-008</td>
+                <td>按状态筛选商品</td>
+                <td>验证状态筛选功能</td>
+                <td class="priority-medium">P1</td>
+                <td>1.点击不同状态标签</td>
+                <td>显示对应状态的商品</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-009</td>
+                <td>搜索商品</td>
+                <td>验证搜索功能</td>
+                <td class="priority-medium">P1</td>
+                <td>1.输入关键词<br>2.点击搜索</td>
+                <td>显示匹配的商品</td>
+            </tr>
+            <tr>
+                <td>TC-PRODUCT-010</td>
+                <td>商品列表为空</td>
+                <td>验证空列表提示</td>
+                <td class="priority-low">P2</td>
+                <td>1.确保无商品<br>2.访问列表页</td>
+                <td>显示"暂无商品"提示</td>
+            </tr>
+        </table>
+
+        <h3 id="test-category">4.3 商品分类管理测试用例</h3>
+
+        <table>
+            <tr>
+                <th>测试用例ID</th>
+                <th>测试名称</th>
+                <th>测试目标</th>
+                <th>优先级</th>
+                <th>测试步骤</th>
+                <th>预期结果</th>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-001</td>
+                <td>查看分类列表</td>
+                <td>验证可查看分类列表</td>
+                <td class="priority-high">P0</td>
+                <td>1.访问/categories</td>
+                <td>显示所有分类</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-002</td>
+                <td>添加新分类</td>
+                <td>验证添加分类功能</td>
+                <td class="priority-high">P0</td>
+                <td>1.点击添加按钮<br>2.填写信息<br>3.保存</td>
+                <td>分类添加成功</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-003</td>
+                <td>添加分类-名称为空</td>
+                <td>验证名称必填</td>
+                <td class="priority-medium">P1</td>
+                <td>1.留空名称<br>2.点击保存</td>
+                <td>表单验证提示</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-004</td>
+                <td>添加分类-名称已存在</td>
+                <td>验证名称唯一性</td>
+                <td class="priority-medium">P1</td>
+                <td>1.输入已存在的名称<br>2.点击保存</td>
+                <td>显示错误消息</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-005</td>
+                <td>编辑分类信息</td>
+                <td>验证编辑分类功能</td>
+                <td class="priority-high">P0</td>
+                <td>1.点击编辑按钮<br>2.修改信息<br>3.保存</td>
+                <td>分类更新成功</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-006</td>
+                <td>编辑分类-名称冲突</td>
+                <td>验证名称冲突检测</td>
+                <td class="priority-medium">P1</td>
+                <td>1.修改为已存在的名称<br>2.点击保存</td>
+                <td>显示错误消息</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-007</td>
+                <td>编辑时名称不变</td>
+                <td>验证名称不变也可保存</td>
+                <td class="priority-low">P2</td>
+                <td>1.保持名称不变<br>2.修改描述<br>3.保存</td>
+                <td>更新成功</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-008</td>
+                <td>删除分类</td>
+                <td>验证删除分类功能</td>
+                <td class="priority-medium">P1</td>
+                <td>1.点击删除链接<br>2.确认删除</td>
+                <td>分类删除成功</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-009</td>
+                <td>删除时取消确认</td>
+                <td>验证取消删除操作</td>
+                <td class="priority-low">P2</td>
+                <td>1.点击删除链接<br>2.点击取消</td>
+                <td>分类未被删除</td>
+            </tr>
+            <tr>
+                <td>TC-CATEGORY-010</td>
+                <td>分类列表为空</td>
+                <td>验证空列表提示</td>
+                <td class="priority-low">P2</td>
+                <td>1.删除所有分类<br>2.访问列表页</td>
+                <td>显示"暂无分类"提示</td>
+            </tr>
+        </table>
+
+        <!-- 附录 -->
+        <h2 id="appendix">附录</h2>
+
+        <h3>A. 测试账号信息</h3>
+        <table>
+            <tr>
+                <th>角色</th>
+                <th>用户名</th>
+                <th>密码</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td>管理员</td>
+                <td>admin</td>
+                <td>admin</td>
+                <td>系统管理员账号</td>
+            </tr>
+        </table>
+
+        <h3>B. 测试环境要求</h3>
+        <ul>
+            <li>JDK 21</li>
+            <li>MySQL 9.1+</li>
+            <li>Spring Boot 4.1.0</li>
+            <li>Maven 3.9+</li>
+            <li>Chrome/Firefox/Edge浏览器</li>
+        </ul>
+
+        <h3>C. API端点汇总</h3>
+        <table>
+            <tr>
+                <th>方法</th>
+                <th>路径</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/admin/login</td>
+                <td>登录页面</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/admin/doLogin</td>
+                <td>处理登录</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/admin/logout</td>
+                <td>退出登录</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/admin/dashboard</td>
+                <td>仪表盘</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/admin/products</td>
+                <td>商品审核列表</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/admin/product/{id}/approve</td>
+                <td>审核通过</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/admin/product/{id}/reject</td>
+                <td>审核拒绝</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/admin/categories</td>
+                <td>分类列表</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/admin/category/add</td>
+                <td>添加分类</td>
+            </tr>
+            <tr>
+                <td>POST</td>
+                <td>/admin/category/{id}/edit</td>
+                <td>编辑分类</td>
+            </tr>
+            <tr>
+                <td>GET</td>
+                <td>/admin/category/{id}/delete</td>
+                <td>删除分类</td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p>文档结束</p>
+        </div>
+    </div>
+</body>
+</html>
