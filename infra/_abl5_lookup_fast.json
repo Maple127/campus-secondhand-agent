@@ -1,0 +1,56 @@
+{
+  "scenario": "lookup",
+  "runs": [
+    {
+      "query": "有没有耳机",
+      "strategy": "FAST",
+      "latency_ms": 1230,
+      "tokens_in": 274,
+      "tokens_out": 138,
+      "ok": true
+    },
+    {
+      "query": "100 以内有什么耳机",
+      "strategy": "FAST",
+      "latency_ms": 963,
+      "tokens_in": 200,
+      "tokens_out": 52,
+      "ok": true
+    },
+    {
+      "query": "帮我看看台灯",
+      "strategy": "FAST",
+      "latency_ms": 945,
+      "tokens_in": 270,
+      "tokens_out": 133,
+      "ok": true
+    },
+    {
+      "query": "有卖键盘的吗",
+      "strategy": "FAST",
+      "latency_ms": 855,
+      "tokens_in": 275,
+      "tokens_out": 127,
+      "ok": true
+    },
+    {
+      "query": "300 以下的显示器",
+      "strategy": "FAST",
+      "latency_ms": 2681,
+      "tokens_in": 12333,
+      "tokens_out": 179,
+      "ok": true
+    },
+    {
+      "query": "自行车多少钱",
+      "strategy": "FAST",
+      "latency_ms": 892,
+      "tokens_in": 269,
+      "tokens_out": 85,
+      "ok": true
+    }
+  ],
+  "avg_latency_ms": 1261.0,
+  "avg_tokens_in": 2270.2,
+  "all_answered": true
+}

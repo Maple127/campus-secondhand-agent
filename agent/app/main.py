@@ -34,6 +34,7 @@ from app.config import get_settings
 from app.graph import AgentRunner
 from app.guardrails import GuardrailError, detect_prompt_injection
 from app.metrics import METRICS
+from app.routing import STRATEGY_FAST, STRATEGY_REFUSE, route
 
 logging.basicConfig(
     level=logging.INFO,
@@ -198,7 +199,41 @@ async def chat_stream(
     backend: BackendClient = app.state.backend
     runner: AgentRunner = app.state.runner
 
+    decision = route(req.message)
+
     async def event_generator():
+        # REFUSE 和 FAST 都不进入图：前者直接拒绝，后者只做一次检索 + 一次生成。
+        if decision.strategy == STRATEGY_REFUSE:
+            METRICS.route_refuse += 1
+            yield {
+                "data": json.dumps(
+                    {
+                        "type": "error",
+                        "message": "这个请求我处理不了，换个和二手交易相关的问题试试？",
+                        "strategy": decision.strategy,
+                    },
+                    ensure_ascii=False,
+                )
+            }
+            return
+
+        if decision.strategy == STRATEGY_FAST and _settings.enable_fast_path:
+            METRICS.route_fast += 1
+            fast = await runner.quick_answer(req.message, actor_token=actor_token, backend=backend)
+            if fast is not None:
+                METRICS.route_fast_ok += 1
+                _record_turn(runner)
+                yield {"data": json.dumps({"type": "token", "text": fast.text}, ensure_ascii=False)}
+                yield {
+                    "data": json.dumps(
+                        {"type": "done", "steps": 0, "strategy": decision.strategy},
+                        ensure_ascii=False,
+                    )
+                }
+                return
+            METRICS.route_fast_fallback += 1
+
+        METRICS.route_agent += 1
         try:
             async for event in runner.stream(
                 req.message,
@@ -207,6 +242,7 @@ async def chat_stream(
                 backend=backend,
                 user_name=req.userName,
             ):
+                event["strategy"] = decision.strategy
                 yield {"data": json.dumps(event, ensure_ascii=False)}
         except Exception as exc:
             logger.exception("SSE 流异常")
@@ -230,6 +266,36 @@ async def chat(
     backend: BackendClient = app.state.backend
     runner: AgentRunner = app.state.runner
 
+    # ---- 显式路由：先由规则决定走哪条路，再执行 ----
+    # 规则不调模型，所以这一步是零成本；判错了也有兜底（快路径答不了就退回 agent）。
+    decision = route(req.message)
+    if decision.strategy == STRATEGY_REFUSE:
+        METRICS.route_refuse += 1
+        raise HTTPException(
+            status_code=400,
+            detail="这个请求我处理不了，换个和二手交易相关的问题试试？",
+        )
+    if decision.strategy == STRATEGY_FAST and _settings.enable_fast_path:
+        METRICS.route_fast += 1
+        fast = await runner.quick_answer(req.message, actor_token=actor_token, backend=backend)
+        if fast is not None:
+            METRICS.route_fast_ok += 1
+            _record_turn(runner)
+            return {
+                "reply": fast.text,
+                "events": [
+                    {"type": "token", "text": fast.text},
+                    {"type": "done", "steps": 0},
+                ],
+                "toolCalls": ["search_products"],
+                "usage": runner.last_usage,
+                "strategy": decision.strategy,
+                "routeReason": decision.reason,
+            }
+        # 快路径答不了（检索为空 / 抽不出关键词 / 生成失败）→ 退回 agent
+        METRICS.route_fast_fallback += 1
+    METRICS.route_agent += 1
+
     text: list[str] = []
     events: list[dict] = []
     async for event in runner.stream(
@@ -250,6 +316,8 @@ async def chat(
         "toolCalls": [e["name"] for e in events if e["type"] == "tool_start"],
         # token 用量：评测据此计算单次成本
         "usage": runner.last_usage,
+        "strategy": decision.strategy,
+        "routeReason": decision.reason,
     }
 
 

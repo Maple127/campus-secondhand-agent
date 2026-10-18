@@ -55,6 +55,14 @@ class Metrics:
     guardrail_blocks: int = 0
     """入口检测拦下的注入/越权输入"""
 
+    # ---- 路由 ----
+    route_refuse: int = 0
+    route_fast: int = 0
+    route_fast_ok: int = 0
+    route_fast_fallback: int = 0
+    """快路径答不了、退回 agent 的次数"""
+    route_agent: int = 0
+
     def record_turn(self, tokens_in: int, tokens_out: int) -> None:
         self.turns += 1
         self.tokens_in += tokens_in

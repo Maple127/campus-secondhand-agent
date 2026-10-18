@@ -120,6 +120,8 @@ class AgentRunner:
         # 模型只构建一次：压缩器和主图共用同一个实例。
         # 共用的代价是压缩本身也计入 token 成本（这一点在消融评测里会体现）。
         llm = model if model is not None else build_llm(settings)
+        # FAST 路径也用它：快路径要一次模型调用来组织语言
+        self._llm = llm
         # 上下文压缩器。关闭时不压缩（消融评测用这个开关做对照）。
         self._compressor: Compressor | None = (
             Compressor(
@@ -273,6 +275,29 @@ class AgentRunner:
         """会话是否正等待用户确认（前端刷新后据此恢复确认卡片）。"""
         state = await self._graph.aget_state(self._config(conversation_id))
         return bool(state.next)
+
+    async def quick_answer(
+        self,
+        message: str,
+        *,
+        actor_token: str,
+        backend: BackendClient,
+    ) -> Any:
+        """FAST 路径：一次检索 + 一次模型调用。
+
+        返回 None 表示"这条路答不了"，调用方应退回 agent。
+        """
+        from app.fastpath import try_fast_answer
+
+        result = await try_fast_answer(
+            self._llm,
+            message=message,
+            actor_token=actor_token,
+            backend=backend,
+        )
+        if result is not None:
+            self._last_usage = dict(result.usage)
+        return result
 
     async def _maybe_compress(self, config: RunnableConfig, conversation_id: str) -> None:
         """超出 token 预算时，把早期历史压成一条摘要。

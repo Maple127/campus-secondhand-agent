@@ -70,9 +70,10 @@ Agent 侧限制了重试次数（最多换 1 次说法），实测搜索次数 4
 
 ## 🧪 消融评测与面试自检
 
-- [消融评测](docs/ablation.md)：四个单变量实验——品类词 +33.3pt、压缩 −35.2%、闸门 +25 token、重试 −5.0s
+- [消融评测](docs/ablation.md)：五个单变量实验——品类词 +33.3pt、压缩 −35.2%、闸门 +25 token、重试 −5.0s、路由 −48.6% 延迟
 - [Agent 面试自检表](docs/agent-interview-map.md)：39 个会被追问的问题 → 答案 → 证据 → 空白（27/6/6）
 - [注入防护](docs/injection-defense.md)：入口检测 + 内容围栏，22 条测试
+- [显式策略路由](docs/explicit-routing.md)：REFUSE/FAST/AGENT 三路，响应带 strategy，兜底退回 agent
 
 ## 💰 议价 Copilot（第一阶段）
 

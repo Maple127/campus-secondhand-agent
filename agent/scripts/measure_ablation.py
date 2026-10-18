@@ -209,9 +209,56 @@ async def scenario_fault() -> dict:
     }
 
 
+# ------------------------------------------------------------- 场景：lookup
+
+#: 快路径与 agent 都能答的典型检索请求
+LOOKUP_QUERIES = [
+    "有没有耳机",
+    "100 以内有什么耳机",
+    "帮我看看台灯",
+    "有卖键盘的吗",
+    "300 以下的显示器",
+    "自行车多少钱",
+]
+
+
+async def scenario_lookup() -> dict:
+    """简单检索：快路径 vs agent 的延迟与 token 对比。"""
+    rows: list[dict] = []
+    async with httpx.AsyncClient(trust_env=False) as c:
+        conv = f"abl-lookup-{uuid.uuid4().hex[:6]}"
+        token = await issue_token(c, conv)
+        for i, q in enumerate(LOOKUP_QUERIES, 1):
+            d = await chat(c, token, q, f"{conv}-{i}")
+            usage = d.get("usage") or {}
+            rows.append(
+                {
+                    "query": q,
+                    "strategy": d.get("strategy"),
+                    "latency_ms": d["_latency_ms"],
+                    "tokens_in": int(usage.get("input") or 0),
+                    "tokens_out": int(usage.get("output") or 0),
+                    "ok": bool(d.get("reply")),
+                }
+            )
+            print(
+                f"  {q:<18} {rows[-1]['strategy']:<6} "
+                f"{rows[-1]['latency_ms']:>5}ms  in={rows[-1]['tokens_in']:>5}"
+            )
+
+    n = len(rows) or 1
+    return {
+        "scenario": "lookup",
+        "runs": rows,
+        "avg_latency_ms": round(sum(r["latency_ms"] for r in rows) / n, 1),
+        "avg_tokens_in": round(sum(r["tokens_in"] for r in rows) / n, 1),
+        "all_answered": all(r["ok"] for r in rows),
+    }
+
+
 async def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scenario", choices=["gate", "compress", "fault"], required=True)
+    ap.add_argument("--scenario", choices=["gate", "compress", "fault", "lookup"], required=True)
     ap.add_argument("--turns", type=int, default=12)
     ap.add_argument("--out", default="")
     args = ap.parse_args()
@@ -220,6 +267,8 @@ async def main() -> None:
         result = await scenario_gate()
     elif args.scenario == "fault":
         result = await scenario_fault()
+    elif args.scenario == "lookup":
+        result = await scenario_lookup()
     else:
         result = await scenario_compress(args.turns)
 

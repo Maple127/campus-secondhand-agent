@@ -81,6 +81,10 @@ class Settings(BaseSettings):
     # ---- 后端重试（消融评测用）----
     backend_max_retries: int = Field(default=2, alias="BACKEND_MAX_RETRIES")
 
+    # ---- 策略路由（消融评测用）----
+    # 关掉之后所有 FAST 请求都会走 AGENT，用来对比两条路径的成本
+    enable_fast_path: bool = Field(default=True, alias="ENABLE_FAST_PATH")
+
     def require_llm_key(self) -> str:
         """取 LLM Key，缺失时给出可操作的报错而不是让 SDK 抛晦涩异常。"""
         if not self.deepseek_api_key or self.deepseek_api_key.startswith("sk-xxx"):
