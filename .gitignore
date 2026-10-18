@@ -50,3 +50,6 @@ _research/
 
 # 简历解析中间文件（含个人信息，绝不入库）
 _resume/
+
+# 截图工作目录（Chrome profile 与临时脚本）
+_shots/

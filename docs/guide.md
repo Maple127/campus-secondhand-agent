@@ -1,3 +1,14 @@
+## 界面速览
+
+| 首页 | 商品详情（比价 + 议价） |
+|---|---|
+| ![首页](images/home.png) | ![商品详情](images/product-negotiation.png) |
+
+| AI 助手 | 管理端搜索日志 |
+|---|---|
+| ![AI 助手](images/agent-chat.png) | ![搜索日志](images/admin-search-log.png) |
+
+---
 # 使用指南（零基础）
 
 > 目标：让你从"什么都不懂"到能自己启动、浏览、操作，并分别看到

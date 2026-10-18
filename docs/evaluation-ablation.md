@@ -16,7 +16,7 @@ infra/ablation-tag.ps1
 infra/ablation-agent.ps1
 ```
 
-原始结果：`infra/results/ablation-e1.json`、`infra/ablation-agent.json`。
+原始结果：`infra/results/ablation-e1.json`、`infra/results/ablation-agent.json`。
 
 ---
 

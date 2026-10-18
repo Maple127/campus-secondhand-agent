@@ -162,42 +162,58 @@
 
         function pump() {
             return reader.read().then(function (res) {
-                if (res.done) return;
+                if (res.done) {
+                    // 流结束时缓冲区里可能还剩最后一个事件（没有尾随空行）
+                    if (buffer.trim()) {
+                        handleEvent(buffer, bubble);
+                        buffer = '';
+                    }
+                    return;
+                }
                 buffer += decoder.decode(res.value, { stream: true });
 
-                // SSE 事件以空行分隔
-                var chunks = buffer.split('\n\n');
+                // SSE 事件以空行分隔。
+                // 注意：sse-starlette 发的是 CRLF（"\r\n\r\n"），早先这里只按 "\n\n" 切，
+                // 结果整个流一个事件都匹配不上 —— 页面永远显示「没有返回内容」。
+                // 两种换行都要认。
+                var chunks = buffer.split(/\r?\n\r?\n/);
                 buffer = chunks.pop();
 
                 chunks.forEach(function (chunk) {
-                    var line = chunk.split('\n').filter(function (l) {
-                        return l.indexOf('data:') === 0;
-                    })[0];
-                    if (!line) return;
-
-                    var evt;
-                    try { evt = JSON.parse(line.slice(5).trim()); } catch (e) { return; }
-
-                    if (evt.type === 'token') {
-                        bubble.textContent += evt.text;
-                        scrollDown();
-                    } else if (evt.type === 'tool_start') {
-                        addTool(evt.name, evt.args);
-                    } else if (evt.type === 'tool_end') {
-                        var box = addTool(evt.name + (evt.ok ? ' ✓' : ' ✗'));
-                        box.classList.add('done');
-                    } else if (evt.type === 'confirmation_required') {
-                        showConfirmation(evt);
-                    } else if (evt.type === 'error') {
-                        bubble.classList.remove('agent-caret');
-                        bubble.className = 'agent-msg error';
-                        bubble.textContent = '⚠️ ' + evt.message;
-                        setStatus('出错', false);
-                    }
+                    handleEvent(chunk, bubble);
                 });
+
                 return pump();
             });
         }
+
+        function handleEvent(chunk, bubble) {
+            var line = chunk.split(/\r?\n/).filter(function (l) {
+                return l.indexOf('data:') === 0;
+            })[0];
+            if (!line) return;
+
+            var evt;
+            try { evt = JSON.parse(line.slice(5).trim()); } catch (e) { return; }
+
+            if (evt.type === 'token') {
+                bubble.textContent += evt.text;
+                scrollDown();
+            } else if (evt.type === 'tool_start') {
+                addTool(evt.name, evt.args);
+            } else if (evt.type === 'tool_end') {
+                var box = addTool(evt.name + (evt.ok ? ' ✓' : ' ✗'));
+                box.classList.add('done');
+            } else if (evt.type === 'confirmation_required') {
+                showConfirmation(evt);
+            } else if (evt.type === 'error') {
+                bubble.classList.remove('agent-caret');
+                bubble.className = 'agent-msg error';
+                bubble.textContent = '⚠️ ' + evt.message;
+                setStatus('出错', false);
+            }
+        }
+
         return pump();
     }
 

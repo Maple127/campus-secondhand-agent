@@ -34,7 +34,7 @@ from app.config import get_settings
 from app.graph import AgentRunner
 from app.guardrails import GuardrailError, detect_prompt_injection
 from app.metrics import METRICS
-from app.routing import STRATEGY_FAST, STRATEGY_REFUSE, route
+from app.routing import STRATEGY_AGENT, STRATEGY_FAST, STRATEGY_REFUSE, route
 
 logging.basicConfig(
     level=logging.INFO,
@@ -210,7 +210,7 @@ async def chat_stream(
                     {
                         "type": "error",
                         "message": "这个请求我处理不了，换个和二手交易相关的问题试试？",
-                        "strategy": decision.strategy,
+                        "strategy": STRATEGY_REFUSE,
                     },
                     ensure_ascii=False,
                 )
@@ -226,7 +226,7 @@ async def chat_stream(
                 yield {"data": json.dumps({"type": "token", "text": fast.text}, ensure_ascii=False)}
                 yield {
                     "data": json.dumps(
-                        {"type": "done", "steps": 0, "strategy": decision.strategy},
+                        {"type": "done", "steps": 0, "strategy": STRATEGY_FAST},
                         ensure_ascii=False,
                     )
                 }
@@ -242,7 +242,8 @@ async def chat_stream(
                 backend=backend,
                 user_name=req.userName,
             ):
-                event["strategy"] = decision.strategy
+                event["strategy"] = STRATEGY_AGENT
+                event["routeReason"] = decision.reason
                 yield {"data": json.dumps(event, ensure_ascii=False)}
         except Exception as exc:
             logger.exception("SSE 流异常")
@@ -289,7 +290,7 @@ async def chat(
                 ],
                 "toolCalls": ["search_products"],
                 "usage": runner.last_usage,
-                "strategy": decision.strategy,
+                "strategy": STRATEGY_FAST,
                 "routeReason": decision.reason,
             }
         # 快路径答不了（检索为空 / 抽不出关键词 / 生成失败）→ 退回 agent
@@ -316,7 +317,7 @@ async def chat(
         "toolCalls": [e["name"] for e in events if e["type"] == "tool_start"],
         # token 用量：评测据此计算单次成本
         "usage": runner.last_usage,
-        "strategy": decision.strategy,
+        "strategy": STRATEGY_AGENT,
         "routeReason": decision.reason,
     }
 
