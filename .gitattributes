@@ -1,0 +1,20 @@
+# 统一换行符，避免 Windows/Linux 来回改整个文件
+* text=auto eol=lf
+
+# Windows 脚本必须 CRLF，否则某些环境下执行报错
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# 二进制文件不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.zip binary
+
+# 依赖锁文件不参与 diff 统计
+pnpm-lock.yaml linguist-generated=true
+package-lock.json linguist-generated=true

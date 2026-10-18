@@ -1,0 +1,46 @@
+# ---------- Java / Maven ----------
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---------- IDE ----------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
+# ---------- Python (agent) ----------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+chroma_data/
+*.egg-info/
+
+# ---------- 运行时数据 ----------
+# 用户上传的商品图片属于运行时数据，不入库
+uploads/*
+!uploads/.gitkeep
+# Agent 运行时状态（LangGraph checkpointer + 幂等账本）
+agent/data/
+
+# ---------- 秘密 ----------
+# 真实的 API Key / 数据库密码请放 .env，不要提交
+.env
+.env.local
+*.local.properties
+AGENT_SERVICE_TOKEN.txt
+
+# ---------- 日志与临时产物 ----------
+*.log
+_restore/
+_lombok_probe/
+cp.txt

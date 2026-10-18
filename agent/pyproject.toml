@@ -1,0 +1,68 @@
+# ============================================================
+# Python 侧工程配置（ruff / mypy / pytest）
+#
+# 为什么单独建这个文件：
+#   requirements.txt 只解决"装什么"，这个文件解决"怎么检查"。
+#   没有 lint 和类型检查的项目，在 CI 里没有门槛 ——
+#   所有错误都要靠人工 review 才发现。
+# ============================================================
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["."]
+
+[tool.ruff.lint]
+# E/W  基础风格（pycodestyle）
+# F    Pyflakes（未使用变量、未定义名字）
+# I    import 排序
+# UP   pyupgrade（用现代写法）
+# B    bugbear（易错写法）
+# SIM  简化建议
+# RUF  ruff 自有规则
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "RUF", "BLE"]
+
+ignore = [
+    # 行太长由 formatter 管，不在 lint 阶段卡
+    "E501",
+    # 这个项目的中文注释与文案大量使用全角标点（，。：（）），
+    # RUF001-003 会把它当成"易混淆的 Unicode 字符"报错 —— 对中文代码库是噪音
+    "RUF001",
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# 测试与脚本里允许较宽松的写法
+"tests/*" = ["B011", "SIM117"]
+"eval/*" = ["E402", "SIM117"]
+# 这些是一次性验证脚本：允许模块级 import 在 sys.path 调整之后、
+# 允许 print 输出、允许防守式 try/except（失败即跳过）
+"scripts/*" = ["E402", "T201", "SIM105", "BLE001"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+# 渐进式：先保证"明显的类型错误"能拦住，不追求全量标注
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+# LangChain/LangGraph 的类型标注不全，对它们的调用不做严格检查
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = ["langchain", "langchain.*", "langgraph", "langgraph.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

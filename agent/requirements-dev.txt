@@ -1,0 +1,7 @@
+# 开发/CI 专用依赖（不进生产镜像）
+# 安装：pip install -r requirements.txt -r requirements-dev.txt
+
+-r requirements.txt
+
+ruff>=0.17,<1.0
+mypy>=1.19,<3.0
