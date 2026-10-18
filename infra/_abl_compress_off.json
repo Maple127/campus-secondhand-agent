@@ -1,0 +1,83 @@
+{
+  "scenario": "compress",
+  "turns": 12,
+  "tokens_in_total": 138038,
+  "tokens_in_last3": 26789,
+  "compactions": 0,
+  "tokens_saved_by_compaction": 0,
+  "rows": [
+    {
+      "turn": 1,
+      "tokens_in": 13101,
+      "tokens_out": 435,
+      "latency_ms": 4197
+    },
+    {
+      "turn": 2,
+      "tokens_in": 10453,
+      "tokens_out": 209,
+      "latency_ms": 2030
+    },
+    {
+      "turn": 3,
+      "tokens_in": 12063,
+      "tokens_out": 279,
+      "latency_ms": 2717
+    },
+    {
+      "turn": 4,
+      "tokens_in": 13719,
+      "tokens_out": 225,
+      "latency_ms": 2118
+    },
+    {
+      "turn": 5,
+      "tokens_in": 7214,
+      "tokens_out": 58,
+      "latency_ms": 1477
+    },
+    {
+      "turn": 6,
+      "tokens_in": 14752,
+      "tokens_out": 150,
+      "latency_ms": 2162
+    },
+    {
+      "turn": 7,
+      "tokens_in": 7571,
+      "tokens_out": 28,
+      "latency_ms": 883
+    },
+    {
+      "turn": 8,
+      "tokens_in": 15553,
+      "tokens_out": 205,
+      "latency_ms": 2290
+    },
+    {
+      "turn": 9,
+      "tokens_in": 16823,
+      "tokens_out": 232,
+      "latency_ms": 2191
+    },
+    {
+      "turn": 10,
+      "tokens_in": 8812,
+      "tokens_out": 100,
+      "latency_ms": 1373
+    },
+    {
+      "turn": 11,
+      "tokens_in": 8923,
+      "tokens_out": 122,
+      "latency_ms": 1175
+    },
+    {
+      "turn": 12,
+      "tokens_in": 9054,
+      "tokens_out": 16,
+      "latency_ms": 1009
+    }
+  ],
+  "probe_reply": "**你要买的**\n- 台灯（放宿舍用，最好能调光），预算上限 120 元，超过就不要\n- 打算今天下午去买\n\n**你说过不要的**\n- 耳机：100 元以内的有线耳机只是看看，明确说「先不买」\n- 收纳箱：只是问行情，没说要买\n\n**顺带记的**\n- 台灯超 120 元一律不考虑\n\n**当前最匹配的**\n- 护眼台灯LED（productId 19）¥45 — 三色温可调、带 USB 口、2 号宿舍楼下\n\n需要我现在帮你下单吗？"
+}

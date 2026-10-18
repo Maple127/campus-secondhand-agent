@@ -20,11 +20,15 @@ from app.backend import (
 SERVICE_TOKEN = "test-service-token"
 
 
-def make_client(handler) -> BackendClient:
+def make_client(handler, *, max_retries: int = 0) -> BackendClient:
+    """默认关掉重试，让"错误翻译"类用例保持简单；
+    重试行为由专门的用例用 max_retries 打开。"""
     return BackendClient(
         base_url="http://backend.test",
         service_token=SERVICE_TOKEN,
         transport=httpx.MockTransport(handler),
+        max_retries=max_retries,
+        retry_base_delay=0.0,
     )
 
 
@@ -159,7 +163,7 @@ async def test_timeout_becomes_backend_error():
         await client.aclose()
 
     assert ei.value.status == 504
-    assert "超时" in ei.value.message
+    assert "暂时不可用" in ei.value.message
 
 
 async def test_connection_error_becomes_backend_error():
@@ -175,8 +179,9 @@ async def test_connection_error_becomes_backend_error():
     finally:
         await client.aclose()
 
-    assert ei.value.status == 502
-    assert "无法连接后端服务" in ei.value.message
+    # 连接失败属于"上游不可达"，重试耗尽后归为 504（网关超时/上游不可用）
+    assert ei.value.status == 504
+    assert "暂时不可用" in ei.value.message
 
 
 async def test_non_json_error_body_is_tolerated():

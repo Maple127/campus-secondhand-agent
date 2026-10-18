@@ -1,0 +1,83 @@
+{
+  "scenario": "compress",
+  "turns": 12,
+  "tokens_in_total": 94334,
+  "tokens_in_last3": 15198,
+  "compactions": 3,
+  "tokens_saved_by_compaction": 3058,
+  "rows": [
+    {
+      "turn": 1,
+      "tokens_in": 8275,
+      "tokens_out": 258,
+      "latency_ms": 2756
+    },
+    {
+      "turn": 2,
+      "tokens_in": 9351,
+      "tokens_out": 203,
+      "latency_ms": 2152
+    },
+    {
+      "turn": 3,
+      "tokens_in": 10630,
+      "tokens_out": 198,
+      "latency_ms": 2794
+    },
+    {
+      "turn": 4,
+      "tokens_in": 10091,
+      "tokens_out": 241,
+      "latency_ms": 3632
+    },
+    {
+      "turn": 5,
+      "tokens_in": 5416,
+      "tokens_out": 68,
+      "latency_ms": 811
+    },
+    {
+      "turn": 6,
+      "tokens_in": 11177,
+      "tokens_out": 116,
+      "latency_ms": 2010
+    },
+    {
+      "turn": 7,
+      "tokens_in": 4448,
+      "tokens_out": 48,
+      "latency_ms": 2315
+    },
+    {
+      "turn": 8,
+      "tokens_in": 14442,
+      "tokens_out": 323,
+      "latency_ms": 3104
+    },
+    {
+      "turn": 9,
+      "tokens_in": 5306,
+      "tokens_out": 57,
+      "latency_ms": 1028
+    },
+    {
+      "turn": 10,
+      "tokens_in": 5376,
+      "tokens_out": 36,
+      "latency_ms": 1124
+    },
+    {
+      "turn": 11,
+      "tokens_in": 5423,
+      "tokens_out": 149,
+      "latency_ms": 1375
+    },
+    {
+      "turn": 12,
+      "tokens_in": 4399,
+      "tokens_out": 33,
+      "latency_ms": 2421
+    }
+  ],
+  "probe_reply": "**要买的**：宿舍用台灯，需可调光。\n\n**预算**：不超过 120 元，超过就放弃。\n\n**说过不要的**：\n- 耳机（小米圈铁 ¥60、苹果原装 ¥45）——只是看看，暂不买\n- 收纳箱——只是看过价格（12~35 元），没说要买\n\n**目前候选**（都在预算内）：护眼台灯LED（19）¥45，三色温可调带 USB 口；护眼台灯LED（145）¥38，但灯罩发黄、描述没提调光。\n\n要下单的话跟我说，我直接提交。"
+}

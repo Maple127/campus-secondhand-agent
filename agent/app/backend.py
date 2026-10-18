@@ -11,12 +11,32 @@
 
 from __future__ import annotations
 
+import asyncio
+import logging
+import random
 from typing import Any
 
 import httpx
 
+from app.metrics import METRICS
+
+logger = logging.getLogger(__name__)
+
 SERVICE_TOKEN_HEADER = "X-Service-Token"
 ACTOR_TOKEN_HEADER = "X-Actor-Token"
+
+#: 可以重试的传输层异常。
+#: 共同点：请求**没有到达业务逻辑**，重试不会造成重复副作用。
+_RETRYABLE_EXC: tuple[type[Exception], ...] = (
+    httpx.TimeoutException,
+    httpx.ConnectError,
+    httpx.ReadError,
+    httpx.RemoteProtocolError,
+)
+
+#: 可以重试的 HTTP 状态码。只包含"服务端暂时性故障"，
+#: 不含 4xx —— 4xx 是业务结论（商品已售出、没权限），重试一万次也一样。
+_RETRYABLE_STATUS = frozenset({502, 503, 504})
 
 
 class BackendError(Exception):
@@ -73,9 +93,13 @@ class BackendClient:
         timeout: float = 20.0,
         transport: httpx.AsyncBaseTransport | None = None,
         trust_env: bool = False,
+        max_retries: int = 2,
+        retry_base_delay: float = 0.15,
     ) -> None:
         self._base_url = base_url.rstrip("/")
         self._service_token = service_token
+        self._max_retries = max(0, max_retries)
+        self._retry_base_delay = max(0.0, retry_base_delay)
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
             timeout=httpx.Timeout(timeout),
@@ -109,29 +133,68 @@ class BackendClient:
         # 去掉值为 None 的查询参数，避免把 "None" 当字符串传给后端
         clean_params = {k: v for k, v in (params or {}).items() if v is not None}
 
-        try:
-            resp = await self._client.request(
-                method,
-                path,
-                headers=self._headers(actor_token),
-                params=clean_params or None,
-                json=json,
-            )
-        except httpx.TimeoutException as exc:
-            raise BackendError(504, 504, "后端服务响应超时，请稍后重试") from exc
-        except httpx.HTTPError as exc:
-            raise BackendError(502, 502, f"无法连接后端服务：{exc}") from exc
+        max_attempts = self._max_retries + 1
+        last_exc: Exception | None = None
 
-        if resp.status_code >= 400:
-            raise self._to_error(resp)
+        for attempt in range(max_attempts):
+            is_last = attempt == max_attempts - 1
+            try:
+                resp = await self._client.request(
+                    method,
+                    path,
+                    headers=self._headers(actor_token),
+                    params=clean_params or None,
+                    json=json,
+                )
+            except _RETRYABLE_EXC as exc:
+                # 传输层失败：请求没进到业务逻辑，重试是安全的
+                last_exc = exc
+                if is_last:
+                    METRICS.retry_exhausted += 1
+                    logger.warning(
+                        "后端不可达（重试 %d 次后放弃）: %s %s", self._max_retries, method, path
+                    )
+                    raise BackendError(504, 504, "后端服务暂时不可用，请稍后重试") from exc
+                await self._backoff(attempt, f"{method} {path}", repr(exc))
+                continue
+            except httpx.HTTPError as exc:
+                # 其他 HTTP 客户端错误（编码、协议）不重试
+                raise BackendError(502, 502, f"无法连接后端服务：{exc}") from exc
 
-        payload = resp.json()
-        # 后端统一响应体 {code, message, data}
-        if isinstance(payload, dict) and payload.get("code", 0) != 0:
-            raise BackendError(
-                resp.status_code, payload.get("code", -1), payload.get("message", "未知错误")
-            )
-        return payload.get("data") if isinstance(payload, dict) else payload
+            if resp.status_code in _RETRYABLE_STATUS and not is_last:
+                await self._backoff(attempt, f"{method} {path}", f"HTTP {resp.status_code}")
+                continue
+
+            if resp.status_code >= 400:
+                # 走到这里说明 4xx，或 5xx 已经重试耗尽：都是最终结论，不重试
+                if resp.status_code in _RETRYABLE_STATUS:
+                    METRICS.retry_exhausted += 1
+                raise self._to_error(resp)
+
+            if attempt > 0:
+                METRICS.retry_success += 1
+
+            payload = resp.json()
+            # 后端统一响应体 {code, message, data}
+            if isinstance(payload, dict) and payload.get("code", 0) != 0:
+                raise BackendError(
+                    resp.status_code, payload.get("code", -1), payload.get("message", "未知错误")
+                )
+            return payload.get("data") if isinstance(payload, dict) else payload
+
+        # 理论上到不了：循环内每条分支都 return 或 raise
+        raise BackendError(504, 504, "后端服务暂时不可用，请稍后重试") from last_exc
+
+    async def _backoff(self, attempt: int, target: str, reason: str) -> None:
+        """指数退避 + 抖动。
+
+        加抖动是因为多个工具可能同时失败（后端刚挂时），
+        没有抖动它们会以完全相同的节奏一起重试，等于给后端再来一次冲击。
+        """
+        METRICS.retries += 1
+        delay = self._retry_base_delay * (2**attempt) + random.uniform(0, self._retry_base_delay)
+        logger.info("重试 %s（%s），第 %d 次，等待 %.2fs", target, reason, attempt + 1, delay)
+        await asyncio.sleep(delay)
 
     @staticmethod
     def _to_error(resp: httpx.Response) -> BackendError:

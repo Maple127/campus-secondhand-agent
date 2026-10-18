@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,16 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final AuditService auditService;
     private final ProductTypeService productTypeService;
+
+    /**
+     * 品类词扩展开关。默认开启。
+     *
+     * 加这个开关的唯一目的是**消融评测**：关掉它就能测出
+     * "品类词到底贡献了多少召回"，而不是只能凭感觉说"有用"。
+     * 线上没人会去关它。
+     */
+    @Value("${app.search.type-match-enabled:true}")
+    private boolean typeMatchEnabled;
 
     /** `IN ()` 在 JPQL 里非法，没命中品类时用这个不可能匹配的值占位 */
     private static final List<String> NO_TYPE = List.of("__NO_TYPE__");
@@ -67,6 +78,11 @@ public class ProductService {
      * 也就是说：**词表覆盖不到的词，不会比以前更差。**
      */
     private List<String> typeNamesFor(String keyword) {
+        if (!typeMatchEnabled) {
+            // 消融评测用：关掉品类词扩展，观察"纯文本匹配"能召回多少。
+            // 线上永远是 true，这个开关只通过配置临时关闭。
+            return NO_TYPE;
+        }
         List<String> matched = productTypeService.typesMatching(keyword);
         return matched.isEmpty() ? NO_TYPE : matched;
     }

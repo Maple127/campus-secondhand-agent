@@ -1,0 +1,13 @@
+{
+  "scenario": "gate",
+  "tool_calls": [
+    "search_products",
+    "search_products"
+  ],
+  "tool_call_count": 2,
+  "tokens_in": 12302,
+  "tokens_out": 136,
+  "latency_ms": 3157,
+  "empty_search_blocks": 0,
+  "reply": "平台上暂时没有在售的二手投影仪。\n\n你可以：\n- 换个类目逛逛（比如「数码电子」下的其他影音设备）\n- 或者自己发布一件求购/闲置，让同学主动联系你\n\n需要我帮你看看数码电子分类下都有什么吗？"
+}

@@ -23,10 +23,11 @@ from typing import Any, Literal, cast
 
 import httpx
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
+from langchain_core.messages import AIMessage, AIMessageChunk, RemoveMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.base import BaseCheckpointSaver
+from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from langgraph.types import Command
 from pydantic import SecretStr
 
@@ -36,6 +37,8 @@ from app.backend import BackendClient
 from app.config import Settings
 from app.hitl import confirmation_context
 from app.idempotency import IdempotentExecutor
+from app.memory import Compressor
+from app.metrics import METRICS
 from app.prompt import build_system_prompt
 
 logger = logging.getLogger(__name__)
@@ -114,8 +117,21 @@ class AgentRunner:
         # 最近一次 stream/resume 的 token 用量。
         # 从流式 chunk 的 usage_metadata 累加 —— 评测需要它来算单次成本。
         self._last_usage: dict[str, int] = {"input": 0, "output": 0}
+        # 模型只构建一次：压缩器和主图共用同一个实例。
+        # 共用的代价是压缩本身也计入 token 成本（这一点在消融评测里会体现）。
+        llm = model if model is not None else build_llm(settings)
+        # 上下文压缩器。关闭时不压缩（消融评测用这个开关做对照）。
+        self._compressor: Compressor | None = (
+            Compressor(
+                llm,
+                budget=settings.context_token_budget,
+                keep_recent=settings.compress_keep_recent,
+            )
+            if settings.enable_compression
+            else None
+        )
         self._graph = create_agent(
-            model=model if model is not None else build_llm(settings),
+            model=llm,
             # 只读工具 + 写工具：写工具内部会 interrupt() 等用户确认
             tools=[*tools_module.READ_ONLY_TOOLS, *write_tools.WRITE_TOOLS],
             system_prompt=build_system_prompt(),
@@ -153,6 +169,9 @@ class AgentRunner:
 
         steps = 0
         self._reset_usage()
+        # 压缩必须发生在"本轮消息进入状态"之前：
+        # 此时 checkpoint 里全是历史，可以安全地整段替换。
+        await self._maybe_compress(config, conversation_id)
         try:
             with (
                 tools_module.tool_context(actor_token, backend),
@@ -254,6 +273,44 @@ class AgentRunner:
         """会话是否正等待用户确认（前端刷新后据此恢复确认卡片）。"""
         state = await self._graph.aget_state(self._config(conversation_id))
         return bool(state.next)
+
+    async def _maybe_compress(self, config: RunnableConfig, conversation_id: str) -> None:
+        """超出 token 预算时，把早期历史压成一条摘要。
+
+        三条保护：
+
+        1. **有挂起的人工确认时不动历史** —— interrupt 的载荷引用了具体的
+           工具调用和消息，改写消息列表会让恢复时对不上。
+        2. **压缩失败不阻断对话** —— 牺牲一次压缩，换这一轮照常回答。
+        3. **整段替换而不是逐条删除** —— 摘要必须排在近期消息之前，
+           靠 REMOVE_ALL_MESSAGES + 重新追加保证顺序。
+        """
+        if self._compressor is None:
+            return
+        try:
+            state = await self._graph.aget_state(config)
+            if state.next:
+                # 等待用户确认中，跳过
+                return
+            messages = list((state.values or {}).get("messages") or [])
+            plan = await self._compressor.plan(messages)
+            if plan is None:
+                return
+            await self._graph.aupdate_state(
+                config,
+                {
+                    "messages": [
+                        RemoveMessage(id=REMOVE_ALL_MESSAGES),
+                        plan.summary,
+                        *plan.keep,
+                    ]
+                },
+            )
+            METRICS.record_compaction(plan.saved_tokens)
+            logger.info("会话 %s 已压缩历史，保留近期 %d 条", conversation_id, len(plan.keep))
+        except Exception:
+            METRICS.compaction_failures += 1
+            logger.warning("上下文压缩失败，本轮按原样继续", exc_info=True)
 
     async def _translate(self, chunk: Any) -> AsyncIterator[dict[str, Any]]:
         """把 LangGraph 的 stream_mode=["messages","updates"] 输出翻译成前端事件。"""

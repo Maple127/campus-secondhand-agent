@@ -21,6 +21,7 @@ import json
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,6 +32,7 @@ from sse_starlette.sse import EventSourceResponse
 from app.backend import BackendClient, BackendError
 from app.config import get_settings
 from app.graph import AgentRunner
+from app.metrics import METRICS
 
 logging.basicConfig(
     level=logging.INFO,
@@ -219,6 +221,7 @@ async def chat(
         if event["type"] == "token":
             text.append(event["text"])
 
+    _record_turn(runner)
     return {
         "reply": "".join(text),
         "events": events,
@@ -226,6 +229,28 @@ async def chat(
         # token 用量：评测据此计算单次成本
         "usage": runner.last_usage,
     }
+
+
+def _record_turn(runner: Any) -> None:
+    """每轮对话后累计指标（token / 轮次）。"""
+    usage = runner.last_usage
+    METRICS.record_turn(int(usage.get("input") or 0), int(usage.get("output") or 0))
+
+
+@app.get("/api/metrics")
+async def metrics() -> dict[str, Any]:
+    """进程内指标快照。
+
+    用途：消融评测直接读它，回答"重试触发了几次""压缩省了多少"这类问题，
+    不必去解析日志。
+    """
+    return {"counters": METRICS.snapshot()}
+
+
+@app.post("/api/metrics/reset")
+async def metrics_reset() -> dict[str, bool]:
+    METRICS.reset()
+    return {"ok": True}
 
 
 @app.post("/api/chat/resume")

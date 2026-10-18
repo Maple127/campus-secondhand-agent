@@ -65,6 +65,17 @@ class Settings(BaseSettings):
     # 状态若只存内存，进程一重启确认就丢失，用户再也无法完成该操作。
     checkpoint_db_path: str = Field(default="./data/agent_state.db", alias="CHECKPOINT_DB_PATH")
 
+    # ---- 上下文管理 ----
+    # 预算按 token 算而不是按轮数：一轮长描述和一句「嗯」差别很大。
+    # 6000 是经验值，够放近期 6 条 + 一条摘要，又不至于把 DeepSeek 的窗口当无限用。
+    context_token_budget: int = Field(default=6000, alias="CONTEXT_TOKEN_BUDGET")
+    compress_keep_recent: int = Field(default=6, alias="COMPRESS_KEEP_RECENT")
+    enable_compression: bool = Field(default=True, alias="ENABLE_COMPRESSION")
+
+    # ---- 检索闸门（消融评测用）----
+    # 关掉它就能测出「空结果重试上限」到底值多少
+    enable_empty_search_gate: bool = Field(default=True, alias="ENABLE_EMPTY_SEARCH_GATE")
+
     def require_llm_key(self) -> str:
         """取 LLM Key，缺失时给出可操作的报错而不是让 SDK 抛晦涩异常。"""
         if not self.deepseek_api_key or self.deepseek_api_key.startswith("sk-xxx"):
