@@ -44,3 +44,6 @@ AGENT_SERVICE_TOKEN.txt
 _restore/
 _lombok_probe/
 cp.txt
+
+# 第三方参考源码（调研用，不入库）
+_research/
