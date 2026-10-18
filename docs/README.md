@@ -14,6 +14,7 @@
 | **接 agent 的接口** | [Agent 接口约定](agent-api.md) |
 | **看某个具体设计怎么权衡的** | [深入阅读](#深入阅读) |
 | **挑毛病 / 看哪里不行** | [已知限制](limitations.md) · [面试自检表](interview-map.md) |
+| **写简历，这些数字能不能写** | [数字口径](numbers.md) |
 
 ---
 
@@ -29,6 +30,7 @@
 | [evaluation-findings.md](evaluation-findings.md) | 30 任务 × 3 对照的结论：**agent 在哪些场景是负收益** | 所有人（这是本项目的核心判断） |
 | [evaluation-ablation.md](evaluation-ablation.md) | 五个单变量消融：每个组件到底贡献多少 | 想看数据的人 |
 | [limitations.md](limitations.md) | 没做的、做不好的、没验证的——**一页看全** | 评审 / 面试官 |
+| [numbers.md](numbers.md) | 哪些数字能对外说、哪些不能、为什么 | 写简历 / 面试 |
 | [interview-map.md](interview-map.md) | 39 个会被追问的问题 → 答案 → 证据 → 空白 | 要拿它面试的人 |
 
 ## 深入阅读

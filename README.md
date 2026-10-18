@@ -136,6 +136,7 @@ CI 在 `.github/workflows/ci.yml`：后端测试 + ruff + mypy + agent 测试。
 | 到底有没有用 | [价值评测](docs/evaluation-findings.md) · [消融评测](docs/evaluation-ablation.md) |
 | 某个设计怎么权衡 | [路由](docs/deep-dives/routing.md) · [注入防护](docs/deep-dives/injection.md) · [议价](docs/deep-dives/negotiation.md) · [品类词](docs/deep-dives/product-types.md) |
 | 哪里还站不住 | [已知限制](docs/limitations.md) · [面试自检表](docs/interview-map.md) |
+| 这些数字能不能写简历 | [数字口径](docs/numbers.md) |
 
 ---
 
